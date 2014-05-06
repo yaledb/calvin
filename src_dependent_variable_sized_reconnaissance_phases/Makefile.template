@@ -1,0 +1,40 @@
+# Build files only if they exist.
+$(UPPERC_DIR)_SRCS := $(wildcard $($(UPPERC_DIR)_SRCS))
+$(UPPERC_DIR)_OBJS := $(patsubst %.cc, $(OBJDIR)/%.o, $($(UPPERC_DIR)_SRCS))
+
+# Protobuf specific instructions
+ifeq ($(LOWERC_DIR),proto)
+  $(UPPERC_DIR)_OBJS := $(patsubst %.proto, $(OBJDIR)/%.pb.o, $($(UPPERC_DIR)_OBJS))
+endif
+
+$(UPPERC_DIR)_TEST_SRCS := $(wildcard $(LOWERC_DIR)/*_test.cc)
+$(UPPERC_DIR)_TEST_OBJS := $(patsubst %.cc, $(OBJDIR)/%.o, $($(UPPERC_DIR)_TEST_SRCS))
+$(UPPERC_DIR)_TESTS     := $(patsubst %.cc, $(BINDIR)/%, $($(UPPERC_DIR)_TEST_SRCS))
+
+TESTS += test-$(LOWERC_DIR)
+
+all: $(LOWERC_DIR)-all
+
+$(LOWERC_DIR)-all: $(LOWERC_DIR) $(LOWERC_DIR)-tests
+$(LOWERC_DIR): $(patsubst %, $(BINDIR)/%, $($(UPPERC_DIR)_PROG))\
+               $($(UPPERC_DIR)_OBJS)
+$(LOWERC_DIR)-tests: $($(UPPERC_DIR)_TESTS)
+
+ifeq ($(LOWERC_DIR),proto)
+  SRC_CC_FILES :=
+else
+  SRC_CC_FILES := $(LOWERC_DIR)/%.cc
+endif
+  
+$(OBJDIR)/$(LOWERC_DIR)/%.o: $(SRC_CC_FILES) $(SRC_LINKED_OBJECTS)
+	@echo + cxx $<
+	@mkdir -p $(@D)
+	$(V)$(CXX) $(CXXFLAGS) -o $@ -c $<
+
+$(BINDIR)/$(LOWERC_DIR)/%_test: $(OBJDIR)/$(LOWERC_DIR)/%_test.o $($(UPPERC_DIR)_OBJS) \
+                                $(TEST_LINKED_OBJECTS)
+	@echo + ld $@
+	@mkdir -p $(@D)
+	$(V)$(CXX) -o $@ $^ $(LDFLAGS) $(ZMQLDFLAGS)
+
+.PHONY: $(LOWERC_DIR)-all $(LOWERC_DIR) $(LOWERC_DIR)-tests test-$(LOWERC_DIR)

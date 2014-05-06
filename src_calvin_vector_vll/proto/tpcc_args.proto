@@ -1,0 +1,30 @@
+// Author: Thaddeus Diamond (diamond@cs.yale.edu)
+// Author: Kun Ren (kun.ren@yale.edu)
+//
+// This is a TPC-C specific serializable argset
+
+message TPCCArgs {
+  // This represents the system time for the transaction
+  optional double system_time = 1;
+
+  // Number of warehouses in an initialize txn or load generation
+  optional bool multipartition = 10;
+
+  // This represents the total order line count for a new order and an array
+  // of the quantity of item per supply warehouse
+  repeated int32 order_line_count = 20;
+  repeated int32 quantities = 21;
+
+  // In a payment transaction, this represents the amount of payment
+  optional int32 amount = 31;
+
+  // Also, we need to record the last name and previous last name (which if
+  // it does not match means the last name was recently looked up)
+  optional bytes last_name = 32;
+
+
+  optional int32 order_number = 41;
+
+  optional int32 lastest_order_number  = 42;
+  optional int32 threshold = 51;
+}

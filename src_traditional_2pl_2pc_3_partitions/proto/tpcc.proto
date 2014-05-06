@@ -1,0 +1,177 @@
+// Author: Thaddeus Diamond (diamond@cs.yale.edu)
+// Author: Kun Ren (kun.ren@yale.edu)
+//
+// The following are abstract representations of the record types available in
+// TPC-C, represented as protocol buffers
+
+message Warehouse {
+  // A warehouse has only one primary key
+  required bytes id = 1;
+
+  // The following are informational fields as defined in TPC-C standard
+  optional bytes name = 11;
+  optional bytes street_1 = 12;
+  optional bytes street_2 = 13;
+  optional bytes city = 14;
+  optional bytes state = 15;
+  optional bytes zip = 16;
+
+  // The following are income records as specified in TPC-C standard
+  optional double tax = 20;
+  optional double year_to_date = 21;
+}
+
+message District {
+  // A district has one primary key and one parent (foreign) key for the
+  // warehouse it belongs to
+  required bytes id = 1;
+  required bytes warehouse_id = 2;
+
+  // The following are informational fields for a district as defined by the
+  // TPC-C standards
+  optional bytes name = 10;
+  optional bytes street_1 = 11;
+  optional bytes street_2 = 12;
+  optional bytes city = 13;
+  optional bytes state = 14;
+  optional bytes zip = 15;
+
+  // The following are income records as specified in the TPC-C standard
+  optional double tax = 20;
+  optional double year_to_date = 21;
+  optional int32  next_order_id = 22;
+}
+
+message Customer {
+  // A customer has one primary key, one parent (foreign) key for the district
+  // it belongs to and one grandparent (foreign) key for the warehouse the
+  // district it is in belongs to
+  required bytes id = 1;
+  required bytes district_id = 2;
+  required bytes warehouse_id = 3;
+
+  // The following are informational fields for a customer as defined by the
+  // TPC-C standards
+  optional bytes first = 10;
+  optional bytes middle = 11;
+  required bytes last = 12;
+  optional bytes street_1 = 13;
+  optional bytes street_2 = 14;
+  optional bytes city = 15;
+  optional bytes state = 16;
+  optional bytes zip = 17;
+
+  // The following are income records as specified in the TPC-C standard
+  optional int32  since = 20;
+  optional bytes credit = 21;
+  optional double credit_limit = 22;
+  optional double discount = 23;
+  optional double balance = 24;
+  optional double year_to_date_payment = 25;
+  optional int32  payment_count = 26;
+  optional int32  delivery_count = 27;
+
+  // The following is an optional data field for entering miscellany
+  optional bytes data = 30;
+}
+
+message NewOrder {
+  // A new order has one primary key, one parent (foreign) key for the district
+  // it originated in, and one grandparent (foreign) key for the warehouse
+  // the district it originated in belongs to
+  required bytes id = 1;
+  required bytes district_id = 2;
+  required bytes warehouse_id = 3;
+}
+
+message Order {
+  // An order has one primary key, one parent (foreign) key for the customer
+  // that originated the order, one grandparent (foreign) key for the district
+  // that customer is in, and one grandparent (foreign) key for the district's
+  // warehouse
+  required bytes id = 1;
+  required bytes district_id = 2;
+  required bytes warehouse_id = 3;
+  required bytes customer_id = 4;
+
+  // The following are informational fields for an order as defined by the
+  // TPC-C standards
+  optional double entry_date = 10;
+  optional int32 carrier_id = 11;
+  optional int32 order_line_count = 12;
+  optional bool  all_items_local = 13;
+
+  // Embedding OrderLines into Order (by reference). Kind of hackish. (Alex)
+  repeated uint64 order_line_ptr = 14;
+}
+
+message OrderLine {
+  // An order line has a foreign key for the order it belongs to, the district
+  // the order line occurs in, the warehouse that district belongs to,
+  // which item is being ordered and which supply warehouse it is being
+  // taken from
+  required bytes  order_id = 1;
+  required bytes  district_id = 2;
+  required bytes  warehouse_id = 3;
+  required bytes  item_id = 4;
+  required bytes  supply_warehouse_id = 5;
+
+  // The following are informational fields for an orderline as defined by the
+  // TPC-C standards
+  optional int32  number = 10;
+  optional double delivery_date = 11;
+  optional int32  quantity = 12;
+  optional double amount = 13;
+  optional bytes district_information = 14;
+}
+
+message Item {
+  // An item has only one primary key
+  required bytes id = 1;
+
+  // The following are informational fields for an item as defined by the
+  // TPC-C standards
+  optional bytes name = 10;
+  optional double price = 11;
+
+  // The following is an optional data field for entering miscellany
+  optional bytes data = 20;
+}
+
+message Stock {
+  // A stock has one primary key (the item it represents) and one
+  // foreign key (the warehouse it is in)
+  required bytes id = 1;
+  required bytes item_id = 2;
+  required bytes warehouse_id = 3;
+
+  // The following are informational fields for a stock as defined by the
+  // TPC-C standards
+  optional int32  quantity = 10;
+  repeated bytes  districts = 11;
+  optional int32  year_to_date = 12;
+  optional int32  order_count = 13;
+  optional int32  remote_count = 14;
+
+  // The following is an optional data field for entering miscellany
+  optional bytes data = 20;
+}
+
+message History {
+  // A history object contains keys for the customer that originated the
+  // item, which district and warehouse it was in, and which district and
+  // warehouse the customer belonged to
+  required bytes customer_id = 1;
+  required bytes district_id = 2;
+  required bytes warehouse_id = 3;
+  required bytes customer_district_id = 4;
+  required bytes customer_warehouse_id = 5;
+
+  // The following are informational fields for a history as defined by the
+  // TPC-C standards
+  optional double date = 10;
+  optional double amount = 11;
+
+  // The following is an optional data field for entering miscellany
+  optional bytes data = 20;
+}
