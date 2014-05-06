@@ -1,0 +1,75 @@
+Copyright (c) 2014 Yale University. All rights reserved.
+Developed by: Alexander Thomson, Kun Ren, Thaddeus Diamond, Shu-Chun Weng, Philip Shao, Prof. Daniel Abadi
+
+Calvin is a massively-scalable transactional database solution that allows
+for concurrent, multi-threaded application execution while maintaining
+guarantees of ACIDity.  In order to do this, Calvin uses a pre-determined
+serial ordering of transactions to which every node must guarantee equivalence
+to.  In addition, Calvin contains several components that are used in
+both engineering and research efforts to document the viability of such
+a deterministic system.
+
+Prerequisites
+  - GNU/Linux distro >= 2.6.37.6
+  - G++ >= 4.5.1
+  - Satisfy all dependencies of the following external libraries
+      -# GoogleTest      - Google's Unit Testing Framework
+          - Object Linking: ext/googletest/lib/.libs
+          - Header Include: ext/googletest/include
+      -# ProtocolBuffers - Google's Framework for Serializable PODS
+          - Object Linking: ext/protobuf/src/.libs
+          - Header Include: ext/protobuf/src
+      -# ZeroMQ          - Efficient Message Passing System
+          - Object Linking: ext/zeromq/src/.libs
+          - Header Include: ext/zeromq/include
+      -# Zookeeper       - Apache Implementation of Paxos protocol
+          - Object Linking: ext/zookeeper/.libs
+          - Header Include: ext/zookeeper/include ext/zookeeper/generated
+
+The source folder is comprised of several scripts and directories:
+     - README            - This file
+     - INSTALL           - A detailed (yet slightly outdated) list of installation instructions
+     - ./install-ext     - A script to install all external libraries linked to this project
+     - deploy-run.conf   - Include the machines which Calvin run on
+     - ext/              - Contains several external libraries used in Calvin that must be compiled and linked to source
+     - src_calvin/       - The basic Calvin codebase
+     - src_calvin_3_partitions/    - The Calvin codebase that each distributed transaction spans 3 partitions
+     - src_calvin_4_partitions/    - The Calvin codebase that each distributed transaction spans 4 partitions
+     - src_calvin_vector_vll/      - The calvin codebase that uses VLL to implement Lock Manager thread
+     - src_dependent_remote_index/ - The calvin codebase that was used to test dependent transactions
+     - src_dependent_variable_sized_reconnaissance_phases  - The calvin codebase that varies the amount of work that needs to be done before all dependencies have been resolved
+     - src_single_thread_vll       - The single threaded VLL implementation
+     - src_traditional_2pl_2pc     - The basic tradtional nondeterministic implementation based on Calvin codebase
+     - src_traditional_2pl_2pc_3_partitions     - The traditional nondeterministic implementation that each distributed transactions spans 3 partitions
+     - src_traditional_2pl_2pc_4_partitions     - The traditional nondeterministic implementation that each distributed transactions spans 3 partitions
+(TODO: We plan to combine some folders related to src_calvin_* into one codebase, and so as to src_traditional_*)
+
+
+Installation
+  In order to compile external libraries associated w/Calvin, please run: 
+    $ ./install-ext
+  To compile the source, please run:
+    $ mv src_*** src
+    $ make -j
+  Two directories will be created: bin/, obj/ and logs/.
+   - obj/      - Where all the .o and some .d (dependency files) are sent to
+   - bin/      - Where all the binary and some .d (dependency files) are written
+
+  In order to run an executable (including an individual test) simply invoke the
+  appropriate binary file from the command line.  For example, if you wanted to
+  run calvin_ctl (the executable for launching Calvin), you would invoke from
+  the root directory:
+    $ bin/deployment/cluster -c deploy-run.conf -p src/deployment/portfile -d bin/deployment/db m 0
+
+  Note that: Since all experiments we did before were ran on 8 cores machines, current codebase only can run on 8 cores machines, we will make it more general before public release. 
+  And there are some import parameters you need to edit :
+   - src/deployment/main.cc, #define HOT ***: Set amount of Hot records for micorbenchmark, it is used to vary contention index (100 means contention index = 0.01);
+   - src/sequencer/sequencer.h: #define MAX_BATCH_SIZE *** : Set batch size per 10 ms epoch , set it a little bigger than the actually throughput(100 means every second the sequencer creates 10K transactions)     
+
+  Note that you must be sure that your LD_LIBRARY_PATH includes the object
+  files noted in the dependencies above. And you need to edit deploy-run.conf to include the machines which Calvin run on.
+
+  Currently available binaries' source code can be found in src/bin, include cluster and db.
+
+
+

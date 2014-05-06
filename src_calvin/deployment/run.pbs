@@ -1,0 +1,38 @@
+#PBS -q default
+#PBS -lnodes=3:ppn=8
+#PBS -l walltime=4:00:00
+#PBS -m abe -M thomson@cs.yale.edu
+
+cd db3
+
+# set up test.conf and client_host
+deployment/makeconf.pl > deployment/test.conf
+
+# start system running
+../obj/deployment/cluster deployment/test.conf deployment/portfile ../obj/deployment/db &
+
+# after brief delay, start clients running
+sleep 5
+perl <<END
+  sub unique {
+    my %seen = ();
+    my @r = ();
+    foreach my \$a (@_) {
+      unless (\$seen{\$a}) {
+        push @r, \$a;
+        \$seen{\$a} = 1;
+      }
+    }
+    return @r;
+  }
+  open(NODES, \$ENV{'PBS_NODEFILE'}) or die("Failed to open nodefile.\n");
+  my @allnodes = <NODES>;
+  my @nodes = unique(@allnodes);
+  for(my \$i = 0; \$i <= \$#nodes; \$i++) {
+    my \$addr = \$nodes[\$i];
+    chomp \$addr;
+    system("ssh \$addr \"cd db3; ../obj/deployment/client m 0\"");
+  }
+  close(NODES);
+END
+

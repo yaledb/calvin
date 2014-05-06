@@ -1,0 +1,60 @@
+// Author: Alexander Thomson (thomson@cs.yale.edu)
+// Author: Kun Ren (kun.ren@yale.edu)
+//
+// Protocol buffer used for all network messages in the system.
+
+message MessageProto {
+  // Node to which this message should be sent.
+  required int32 destination_node = 1;
+
+  // Channel to which this message shall be delivered when it arrives at node
+  // 'destination_node'.
+  required string destination_channel = 2;
+
+  // Node from which the message originated.
+  optional int32 source_node = 3;
+
+  // Channel from which the message originated.
+  optional int32 source_channel = 4;
+
+  // Every type of network message should get an entry here.
+  enum MessageType {
+    EMPTY = 0;
+    TXN_PROTO = 1;
+    TXN_BATCH = 2;
+    READ_RESULT = 3;
+    LINK_CHANNEL = 4;    // [Connection implementation specific.]
+    UNLINK_CHANNEL = 5;  // [Connection implementation specific.]
+    TXN_PTR = 6;
+    MESSAGE_PTR = 7;
+  };
+  required MessageType type = 9;
+
+  // Actual data for the message being carried, to be deserialized into a
+  // protocol message object of type depending on 'type'. In TXN_PROTO and
+  // TXN_BATCH messages, 'data' contains are one and any number of TxnProtos,
+  // respectively.
+  repeated bytes data = 11;
+
+  // Pointer to actual data for message being carried. Can only be used for
+  // messages between threads.
+  repeated int64 data_ptr = 12;
+
+  // For TXN_BATCH messages, 'batch_number' identifies the epoch of the txn
+  // batch being sent.
+  optional int64 batch_number = 21;
+
+  // For READ_RESULT messages, 'keys(i)' and 'values(i)' store the key and
+  // result of a read, respectively.
+  repeated bytes keys = 31;
+  repeated bytes values = 32;
+
+  // For (UN)LINK_CHANNEL messages, specifies the main channel of the requesting
+  // Connection object.
+  optional string main_channel = 1001;
+
+  // For (UN)LINK_CHANNEL messages, specifies the channel to be (un)linked
+  // to the requesting Connection object.
+  optional string channel_request = 1002;
+}
+

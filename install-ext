@@ -1,0 +1,16 @@
+git submodule init
+git submodule update
+cd ext/zookeeper
+autoreconf -if
+./configure --prefix=$PWD
+make -j && make install
+cd ../zeromq
+./autogen.sh
+./configure --prefix=$PWD
+make -j
+cd ../protobuf
+./configure --prefix=$PWD
+make -j
+cd ../googletest
+./configure --prefix=$PWD
+make -j

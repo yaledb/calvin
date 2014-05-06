@@ -1,0 +1,193 @@
+      Installation instruction for Calvin
+
+          Author: Shu-Chun Weng (scweng@cs.yale.edu)
+                  Kun Ren (kun.ren@yale.edu)
+                  Thaddeus Diamond (diamond@cs.yale.edu)
+
+ 1. Getting the source from the git repository
+
+      $ git clone ssh://YOUR_USER_ID@codex.cs.yale.edu:29418/db3
+
+ 2. Initializing submodules
+
+      $ git submodule init
+      $ git submodule update
+
+    If you have already done this before but see the following
+    error messages when updating:
+
+      error: SSL certificate problem, verify that the CA cert is OK. Details:
+      error:14090086:SSL routines:SSL3_GET_SERVER_CERTIFICATE:certificate verify failed while accessing https://github.com/zeromq/zeromq2-1/info/refs
+
+    You will have to edit '.git/config' manually. Find the section
+      [submodule "zeromq"]
+              url = https://github.com/zeromq/zeromq2-1
+
+    and replace the 'https' with 'http':
+      [submodule "zeromq"]
+              url = http://github.com/zeromq/zeromq2-1
+
+ 3. Making external libraries
+
+  All of the external libraries will be installed by simply executing the install-ext bash script in the root directory.  For individual installation, please use the following instructions:
+
+  a. Protocal Buffer
+
+      $ cd ext/protobuf
+      $ ./configure --prefix=PATH_OF_YOUR_CHOICE
+      $ make -j
+
+  b. ZeroMQ
+
+      $ cd ext/zeromq
+      $ ls        # There should be a bunch of files in the folder, including
+                  # autogen.sh. Otherwise check step 2 "initializing submodules."
+      $ ./autogen.sh   # May fail on the louise cluster. See below.
+      $ ./configure --prefix=PATH_OF_YOUR_CHOICE
+      $ make -j
+
+     On the louise cluster, the autogen.sh step may fail due to the autoconf
+     tools being out-of-date:
+
+      configure.in:3: error: Autoconf version 2.61 or higher is required
+
+     In this case, again under the zeromq folder, extract the configure scripts
+     from the tar file.
+
+      $ tar zxf /home/sw475/zeromqconf.tgz
+
+     and then proceed with the configuration and making.
+
+  c. zookeeper
+
+      $ cd ext/zookeeper/
+      $ autoreconf -if
+      $ ./configure --prefix=PATH_OF_YOUR_CHOICE
+      $ make -j && make install
+
+      If it gives you an error about "cannot find file 'zookeeper.jute.h' included from 'zookeeper.h'..."
+      then do the following:
+        $ cp generated/zookeeper.jute.h include/
+  
+  d. googletest
+      $ cd ext/googletest
+      $ ./configure --prefix=PATH_OF_YOUR_CHOICE
+      $ make -j
+
+      When making a test now, instead of writing:
+        #include "Common/Testing.h"
+      Simply include:
+        #include <gtest/gtest.h>
+
+      See googletest online for complete API specifications.
+
+ 4. Making the database executable
+
+    Simply run 'make' in the root of the source tree will compile and link
+    the database executable, the deploying script, and the tests into the
+    'obj' folder.
+
+      $ make -j
+
+ 5. Testing
+
+    Most of the components come with unit tests. The makefiles have rules to
+    run the tests automatically.
+
+      $ make test
+
+ 6. Some instructions about run paxos test:
+
+  a. Run paxos test, must start and stop zookeeper(about how to install zookeeper
+     this website describe well: http://zookeeper.apache.org/doc/trunk/zookeeperStarted.html#sc_RunningReplicatedZooKeeper),
+     right now I config zookeeper serveice on three machines of zoo lab(lion,
+     tick, frog). My program will execute ssh command to start zookeeper automatically.
+     So you must config ssh so that you can ssh to the zoo machines without password
+     authorized. So do this is ok: There are two files , id_rsa and id_rsa.pub
+     below ~/.ssh on your own computer, just use scp command to copy the id_rsa.pub
+     to the zoo macheine's ~/.ssh directory, rename it to authorized_keys, Then
+     you can use ssh without password authorized. After that, you should ssh the
+     zookeeper server for the first time, so that when run paxos test, you will
+     not be reminded type "Yes" to continue ssh connection(It's very important).
+     for example:
+     ssh lion.zoo.cs.yale.edu
+     ssh tick.zoo.cs.yale.edu
+     ssh frog.zoo.cs.yale.edu
+
+  b. Modify global variable ZOOKEEPER_CONF of the test file(line 11,
+     paxos/paxos_test.cc) to your own path, so that the program can find the
+     zookeeper config file(Below paxos/ directory).
+
+ 7. Some instructions about run our project on EC2
+
+  a. After log in Amazon EC2 homepage, click "Launch Instance" to start a instances.
+     Then you can choose an AMI. Recently, after I try some instances, I found
+     an appropriate instance which have installed java environment and only need
+     one command to install c/c++ compile environment. Click the "Community AMIs",
+     search with my choosed instances'name : ami-95bc7dfc. The instance's operation
+     system is Ubuntu 11.04, X86_64.
+
+  b. After select the AMI, will steps to the Instance Details page, you can set
+     the number of the instance and instance size. This AMI contains Large, Extra
+     Large, High-Memory and High-CPU types, I run the test with the Extra large
+     type which have 4 CPU Cores, and 15 GB Memory. Also you can select the region
+     where you will put the instance, one region has some different zones. The
+     default settings are ok in the next two pages, so just click Continue on each
+     page. Then you will see the "Create key Pai" page. You can create a key pair
+     which you will use to securely connect the instance. Enter a name for your
+     key pair, which will be the name of the private key file associated with the
+     pair(with a .pem extension). Click "Create & Download your key Pair" to download
+     the key pair. Then steps to the "Security Groups" page, A security group defines
+     firewall rules for your instances you just need to choose from existing security
+     groups, name is kun, which I set that allow all port on TCP, UDP ,ICMP and SSH.
+     After that you will see the review page, can review what we set before and click
+     launch to start the instance. It takes a short time for an instance to launch.
+
+  c. When the status is "running", record the public DNS name of the instance
+     because we will need it when we connect to the instance. For example, the
+     public DNS name looks like "ec2-184-73-58-98.compute-1.amazonaws.com" , and
+     its external ip is 184.73.58.98. Now we can connect to the instance, for
+     example the key file is kunkey.pem(use the chmod 400 *.pem command to make
+     sure your private key file isn't publicly viewable.), the DNS name is
+     "ec2-184-73-58-98.compute-1.amazonaws.com", use the following command:
+     ssh -i kunkey.pem ubuntu@ec2-184-73-58-98.compute-1.amazonaws.com
+     Also you can use scp command to copy files from your computer to the instance,
+     the command is:
+     scp -i kunkey.pem zookeeper-3.3.3.tar.gz ubuntu@ec2-184-73-58-98.compute-1.amazonaws.com:/home/ubuntu/
+
+  d. Now you have log in the instance. Run this command to install c/c++ compile
+     environment:
+     sudo apt-get install build-essential
+     also you will need to run these commands to install some require software
+     (for others, also can run sudo apt-get command to install):
+     sudo apt-get install git # install git
+     sudo apt-get install uuid-dev # required when we compile zeromq module
+     sudo apt-get install libcppunit-dev # required when we compile zookeeper module
+
+  e. Now you can use it as you use zoo computer and follow the above install step
+     you can compile sucessfully. One thing to note is that the instance have
+     installed zookeeper, but we want to use our own zookeeper, after configure
+     the zookeeper as we do at the zoo computer, do these is ok: Run killall -9 java
+     command to kill the zookeeper process; copy all the config file below zookeeper-3.3.3/conf
+     to the /etc/zookeeper/, Now you can start and stop zookeeper normally. Another
+     import thing we should note is that when you want to ssh the other instances,
+     you also need to use the key, like ssh -i *.pem IP, so you need to modify
+     some code related to that, for example:
+     In deployment/cluster.cc, modify lines 176, 306 to(for example, kunkey.pem is the key name):
+     execlp("ssh", "ssh", "-i", "kunkey.pem", remote_opt1, remote_opt2, remote_opt3, NULL);
+     execlp("ssh", "ssh", "-i", "kunkey.pem", node->host.c_str(), "killall", sig_arg, exec_fullpath, NULL);
+     In paxos/paxos.h, modify lines 264, 294, 301 to(also change the zookeeper directory):
+     string ssh_command = "ssh -i kunkey.pem " + zookeepers[i] +
+                          " /home/ubuntu/zookeeper/zookeeper-3.3.3/" +
+                         "bin/zkServer.sh start > zookeeper_log &";
+     ssh_command = "ssh -i kunkey.pem " + zookeepers[0] +
+                   " /home/ubuntu/zookeeper/zookeeper-3.3.3/bin/zkCli.sh -server "
+                   + zookeepers[0] + ":" + port + " delete /root > zookeeper_log";
+     ssh_command = "ssh -i kunkey.pem " + zookeepers[i] + " /home/ubuntu/zookeeper/"
+                   + "zookeeper-3.3.3/bin/zkServer.sh stop > zookeeper_log &";
+     After you modify the config files, such as test.conf, deploy-run.conf
+     zookeeper.conf and ~/.bashrc, you can run our project successfully on EC2.
+     
+  f. Remember that when you finish using the instance, you should Right-click the
+     instance, and then click Terminate. As soon as the instance status changes
+     to shutting down or terminated, you stop incurring charges for that instance.
