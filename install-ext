@@ -1,16 +1,50 @@
-git submodule init
-git submodule update
-cd ext/zookeeper
-autoreconf -if
+#!/bin/bash
+
+# requires: autoconf, libtool, libreadline-dev
+
+cd ext
+
+#zookeeper
+wget http://apache.mirrors.tds.net/zookeeper/current/zookeeper-3.4.6.tar.gz
+tar xzf zookeeper-3.4.6.tar.gz
+rm zookeeper-3.4.6.tar.gz
+mv zookeeper-3.4.6/src/c zookeeper
+rm -fr zookeeper-3.4.6
+cd zookeeper
 ./configure --prefix=$PWD
-make -j && make install
-cd ../zeromq
+make -j
+cd ..
+
+# protobuf
+svn checkout http://protobuf.googlecode.com/svn/trunk/ protobuf
+cd protobuf
 ./autogen.sh
 ./configure --prefix=$PWD
 make -j
-cd ../protobuf
+cd ..
+
+# googletest
+wget http://googletest.googlecode.com/files/gtest-1.6.0.zip
+unzip gtest-1.6.0.zip
+rm gtest-1.6.0.zip
+mv gtest-1.6.0 googletest
+cd googletest
 ./configure --prefix=$PWD
 make -j
-cd ../googletest
+cd ..
+
+
+# zeromq
+wget http://download.zeromq.org/zeromq-2.1.11.tar.gz
+tar xzf zeromq-2.1.11.tar.gz
+rm zeromq-2.1.11.tar.gz
+mv zeromq-2.1.11 zeromq
+cd zeromq
+./autogen.sh
 ./configure --prefix=$PWD
 make -j
+make install
+cd ..
+
+
+
