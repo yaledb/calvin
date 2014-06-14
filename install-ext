@@ -2,6 +2,7 @@
 
 # requires: autoconf, libtool, libreadline-dev
 
+mkdir ext
 cd ext
 
 #zookeeper
