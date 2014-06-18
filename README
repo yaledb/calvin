@@ -5,9 +5,8 @@ Calvin is a massively-scalable transactional database solution that allows
 for concurrent, multi-threaded application execution while maintaining
 guarantees of ACIDity.  In order to do this, Calvin uses a pre-determined
 serial ordering of transactions to which every node must guarantee equivalence
-to.  In addition, Calvin contains several components that are used in
-both engineering and research efforts to document the viability of such
-a deterministic system.
+to. Most of the code is for VLDB 2014 paper: <An Evaluation of the Advantages and Disadvantages of Deterministic Database Systems>
+(The paper is available at: http://www.vldb.org/pvldb/vol7/p821-ren.pdf)
 
 Prerequisites
   - GNU/Linux distro >= 2.6.37.6
