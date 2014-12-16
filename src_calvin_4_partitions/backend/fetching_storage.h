@@ -8,7 +8,8 @@
 
 #include <aio.h>
 #include <pthread.h>
-
+#include <sys/stat.h>
+#include <fcntl.h>
 #include <cassert>
 #include <cstdlib>
 #include <cstring>

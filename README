@@ -49,6 +49,7 @@ Installation
     $ ./install-ext
   To compile the source, please run:
     $ mv src_*** src
+    $ cd src
     $ make -j
   Two directories will be created: bin/, obj/ and logs/.
    - obj/      - Where all the .o and some .d (dependency files) are sent to

@@ -880,7 +880,7 @@ int TPCC::DeliveryTransaction(TxnProto* txn, StorageManager* storage) const {
 // through, indicating we should populate the database with fake data
 void TPCC::InitializeStorage(Storage* storage, Configuration* conf) const {
   // We create and write out all of the warehouses
-  for (int i = 0; i < (WAREHOUSES_PER_NODE * conf->all_nodes.size()); i++) {
+  for (int i = 0; i < (int)(WAREHOUSES_PER_NODE * conf->all_nodes.size()); i++) {
     // First, we create a key for the warehouse
     char warehouse_key[128], warehouse_key_ytd[128];
     Value* warehouse_value = new Value();

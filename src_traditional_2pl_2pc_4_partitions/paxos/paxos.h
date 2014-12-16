@@ -7,7 +7,7 @@
 #define _DB_PAXOS_PAXOS_H_
 
 #include <zookeeper.h>
-
+#include <unistd.h> 
 #include <map>
 #include <string>
 

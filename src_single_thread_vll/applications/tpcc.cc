@@ -949,7 +949,7 @@ string district_string = txn->read_set(i);
 // through, indicating we should populate the database with fake data
 void TPCC::InitializeStorage(Storage* storage, Configuration* conf, int partition_id) const {
   // We create and write out all of the warehouses
-  for (int i = 0; i < (WAREHOUSES_PER_NODE * conf->partitions_size); i++) {
+  for (int i = 0; i < (int)(WAREHOUSES_PER_NODE * conf->partitions_size); i++) {
     // First, we create a key for the warehouse
     char warehouse_key[128], warehouse_key_ytd[128];
     Value warehouse_value;
