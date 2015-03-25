@@ -61,15 +61,15 @@ Installation
   the root directory:
     $ bin/deployment/cluster -c deploy-run.conf -p src/deployment/portfile -d bin/deployment/db m 0
 
-  Note that: Since all experiments we did before were ran on 8 cores machines, current codebase only can run on 8 cores machines, we will make it more general before public release. 
+   If you only run it on one machine, just run the command from the root directory:
+   $ bin/deployment/db 0 m 0
+
+  Note that: Since all experiments we did before were ran on 8 cores machines, current codebase only can be running on 8 cores machines, we will make it more general in the future. If you want to run it on multiple machines, you should make sure each machine has the same user name and each machine is able to ssh the other machines without password, like "ssh 128.26.232.18". Also you need to make sure each machine has the exactly same code, and you should build the same code on each machine.
+
   And there are some import parameters you need to edit :
    - src/deployment/main.cc, #define HOT ***: Set amount of Hot records for micorbenchmark, it is used to vary contention index (100 means contention index = 0.01);
-   - src/sequencer/sequencer.h: #define MAX_BATCH_SIZE *** : Set batch size per 10 ms epoch , set it a little bigger than the actually throughput(100 means every second the sequencer creates 10K transactions)     
+   - src/sequencer/sequencer.h: #define MAX_BATCH_SIZE *** : Set batch size per 10 ms epoch , set it a little bigger than the actually throughput(200 means every second the sequencer creates 20K transactions)     
 
-  Note that you must be sure that your LD_LIBRARY_PATH includes the object
-  files noted in the dependencies above. And you need to edit deploy-run.conf to include the machines which Calvin run on.
-
-  Currently available binaries' source code can be found in src/bin, include cluster and db.
-
+  You should make sure that your LD_LIBRARY_PATH includes the object files noted in the dependencies above. And you need to edit deploy-run.conf to include the machines which Calvin run on(The port should be same with the port in the src/deployment/portfile).
 
 
