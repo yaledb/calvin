@@ -1,7 +1,7 @@
+This material is based upon work supported by the National Science Foundation under Grant Number IIS-1249722. Any opinions, findings, and conclusions or recommendations expressed in this material are those of the author(s) and do not necessarily reflect the views of the National Science Foundation.
+
 Copyright (c) 2014 Yale University. All rights reserved.
 Developed by: Alexander Thomson, Kun Ren, Thaddeus Diamond, Shu-Chun Weng, Philip Shao, Prof. Daniel Abadi
-
-This material is based upon work supported by the National Science Foundation under Grant Number IIS-1249722. Any opinions, findings, and conclusions or recommendations expressed in this material are those of the author(s) and do not necessarily reflect the views of the National Science Foundation.
 
 Calvin is a massively-scalable transactional database solution that allows
 for concurrent, multi-threaded application execution while maintaining
