@@ -19,11 +19,15 @@ make -j
 cd ..
 
 # protobuf
-git clone https://github.com/protocolbuffers/protobuf.git
+wget https://github.com/google/protobuf/releases/download/v3.2.0/protobuf-cpp-3.2.0.tar.gz
+tar -xzf protobuf-cpp-3.2.0.tar.gz
+mv protobuf-3.2.0/ protobuf
+rm -fr protobuf-cpp-3.2.0.tar.gz
 cd protobuf
 ./autogen.sh
 ./configure --prefix=$PWD
 make -j
+make install
 cd ..
 
 # googletest
