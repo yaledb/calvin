@@ -6,7 +6,7 @@ mkdir ext
 cd ext
 
 #zookeeper
-wget http://apache.mirrors.tds.net/zookeeper/current/zookeeper-3.4.6.tar.gz
+wget https://archive.apache.org/dist/zookeeper/zookeeper-3.4.6/zookeeper-3.4.6.tar.gz
 tar xzf zookeeper-3.4.6.tar.gz
 rm zookeeper-3.4.6.tar.gz
 mv zookeeper-3.4.6/src/c zookeeper
@@ -17,7 +17,7 @@ make -j
 cd ..
 
 # protobuf
-svn checkout http://protobuf.googlecode.com/svn/trunk/ protobuf
+git clone https://github.com/protocolbuffers/protobuf.git
 cd protobuf
 ./autogen.sh
 ./configure --prefix=$PWD
@@ -25,10 +25,10 @@ make -j
 cd ..
 
 # googletest
-wget http://googletest.googlecode.com/files/gtest-1.6.0.zip
-unzip gtest-1.6.0.zip
-rm gtest-1.6.0.zip
-mv gtest-1.6.0 googletest
+wget https://github.com/google/googletest/archive/release-1.6.0.zip
+unzip release-1.6.0.zip
+rm release-1.6.0.zip
+mv release-1.6.0.zip googletest
 cd googletest
 ./configure --prefix=$PWD
 make -j
