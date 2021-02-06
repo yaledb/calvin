@@ -3,7 +3,7 @@
 # requires: autoconf  libtool  libreadline-dev
 
 sudo apt-get update
-sudo apt-get install -y zip make cmake g++ autoconf libtool  libreadline-dev
+sudo apt-get install -y zip make cmake g++ autoconf libtool  libreadline-dev automake curl unzip
 mkdir ext
 cd ext
 
@@ -18,39 +18,40 @@ cd zookeeper
 make -j
 cd ..
 
-# protobuf
-wget https://github.com/google/protobuf/releases/download/v3.2.0/protobuf-cpp-3.2.0.tar.gz
-tar -xzf protobuf-cpp-3.2.0.tar.gz
-mv protobuf-3.2.0/ protobuf
-rm -fr protobuf-cpp-3.2.0.tar.gz
-cd protobuf
-./autogen.sh
-./configure --prefix=$PWD
-make -j
-make install
-cd ..
-
 # googletest
-wget https://github.com/google/googletest/archive/release-1.6.0.zip
-unzip release-1.6.0.zip
-rm release-1.6.0.zip
-mv release-1.6.0.zip googletest
+wget https://src.fedoraproject.org/lookaside/pkgs/gtest/gtest-1.6.0.zip/4577b49f2973c90bf9ba69aa8166b786/gtest-1.6.0.zip
+unzip gtest-1.6.0.zip
+rm gtest-1.6.0.zip
+mv gtest-1.6.0 googletest
 cd googletest
 ./configure --prefix=$PWD
 make -j
 cd ..
 
+# protobuf
+git clone https://github.com/protocolbuffers/protobuf.git
+cd protobuf
+git submodule update --init --recursive
+./autogen.sh
+ ./configure
+ make
+ make check
+ sudo make install
+ sudo ldconfig # refresh shared library cache.
+ cd ..
+
+
+
 
 # zeromq
-wget http://download.zeromq.org/zeromq-2.1.11.tar.gz
-tar xzf zeromq-2.1.11.tar.gz
-rm zeromq-2.1.11.tar.gz
-mv zeromq-2.1.11 zeromq
-cd zeromq
+git clone https://github.com/zeromq/libzmq.git
+cd libzmq
+git submodule update --init --recursive
 ./autogen.sh
-./configure --prefix=$PWD
-make -j
-make install
+./configure
+make
+make check
+sudo make install
 cd ..
 
 
