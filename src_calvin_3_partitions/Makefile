@@ -34,7 +34,7 @@ V = @
 
 # Set the compiler and compile-time loaded libraries
 CXX           := g++
-LDLIBRARYPATH := LD_LIBRARY_PATH=$(ZEROMQ)/src/.libs:$(PROTOB)/src/.libs:$(GTEST)/lib/.libs:$(ZOOKPR)/.libs
+LDLIBRARYPATH := LD_LIBRARY_PATH=$(ZEROMQ)/lib:$(PROTOB)/src/.libs:$(GTEST)/build:$(ZOOKPR)/.libs
 
 # For profiling (with gprof), this line should read 'PG = -pg'
 # For fast execution, this line should read 'PG ='.
@@ -42,7 +42,7 @@ PG =
 
 # Set the flags for C++ to compile with (namely where to look for external
 # libraries) and the linker libraries (again to look in the ext/ library)
-CXXFLAGS := -g -MD $(PG) -I$(SRCDIR) -I$(OBJDIR) \
+CXXFLAGS := -g -std=c++11 -MD $(PG) -I$(SRCDIR) -I$(OBJDIR) \
             -I$(ZEROMQ)/include \
             -I$(PROTOB)/src \
             -I$(GTEST)/include \
@@ -51,9 +51,9 @@ CXXFLAGS += -Wall -Werror
 
 LDFLAGS := -lrt -lpthread $(PG) \
            -lprotobuf -L$(PROTOB)/src/.libs \
-           -lgtest -L$(GTEST)/lib/.libs \
+           -lgtest -L$(GTEST)/build \
            -lzookeeper_mt -L$(ZOOKPR)/.libs
-ZMQLDFLAGS := -lzmq -L$(ZEROMQ)/src/.libs
+ZMQLDFLAGS := -lzmq -L$(ZEROMQ)/lib
 
 # Lists that the */Makefile.inc makefile fragments will add to
 OBJDIRS :=
