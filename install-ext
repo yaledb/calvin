@@ -49,5 +49,3 @@ cd zeromq
 make -j
 make install
 cd ..
-
-../set-env
