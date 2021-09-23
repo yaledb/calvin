@@ -1,8 +1,38 @@
 import subprocess
 import time
+from tempfile import mkstemp
+from shutil import move, copymode
+from os import fdopen, remove
+from datetime import datetime
 
-def test_run_once(per_distr,t_out):
-    print("Config#"+per_distr)
+def update_wh(wh):
+    #Create temp file
+    fh, abs_path = mkstemp()
+    file_path = "./src/applications/tpcc.h"
+    with fdopen(fh,'w') as new_file:
+        with open(file_path) as old_file:
+            for line in old_file:
+                if line.startswith("#define WAREHOUSES_PER_NODE"):
+                    line = "#define WAREHOUSES_PER_NODE {}\n".format(wh)
+                new_file.write(line)
+    #Copy the file permissions from the old file to the new file
+    copymode(file_path, abs_path)
+    #Remove original file
+    remove(file_path)
+    #Move new file
+    move(abs_path, file_path)
+
+
+def update_settings(nodes,wh):
+    print("Updating config and building...")
+    update_wh(wh)
+    subprocess.run(['./propogate_settings.sh',str(nodes)])
+    rename_portfile()
+    print("Build finished, start running...")
+
+
+def test_run_once(nodes,per_distr,wh,t_out=90):
+    print("|Config|nnodes:{}|dist:{}|WH:{}".format(nodes,per_distr,wh))
     try:
         rename_portfile()
         subprocess.run(
@@ -11,7 +41,8 @@ def test_run_once(per_distr,t_out):
             '-p','./src/deployment/portfile',
             '-d','./bin/deployment/db',
             't',
-            per_distr
+            str(per_distr),
+            # '2>&1','|','tee','-a','./test_{}'.format(datetime.now().strftime('%Y-%m-%d-%H-%M-%S'))
             ], timeout=t_out
         )
     except subprocess.TimeoutExpired:
@@ -24,10 +55,23 @@ def rename_portfile():
 
 
 if __name__ == "__main__":
-    # test_config = [0,5,10,15,20,30,40,50,60,70,80,90,100]
-    subprocess.run(['./propogate_settings.sh'])
-    # subprocess.run(['sudo','chown','-R','miaoyu','/users/miaoyu/calvin'])
-    test_config = [0]
-    for config in test_config:
-        test_run_once(str(config),None)
+    # # test_config = [0,5,10,15,20,30,40,50,60,70,80,90,100]
+    # subprocess.run(['./propogate_settings.sh'])
+    # # subprocess.run(['sudo','chown','-R','miaoyu','/users/miaoyu/calvin'])
+    # test_config = [0]
+    # for config in test_config:
+    #     test_run_once(str(config),None)
+
+    for nodes in [1,2,4,8,16,32]:
+        for warehouse in [1,2,4,8,16,32,64,128,256,512]:
+            update_settings(nodes,warehouse)
+            for dist in [0,10,20,30,40,50,60,70,80,90,100]:
+                test_run_once(nodes,dist,warehouse)
+    
+
+    # for nodes in [4]:
+    #     for warehouse in [8,16]:
+    #         update_settings(nodes,warehouse)
+    #         for dist in [0,10,20]:
+    #             test_run_once(nodes,dist,warehouse)
 

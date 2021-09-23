@@ -1,6 +1,6 @@
 #!/bin/bash
 
-nnodes=32
+nnodes=$1
 
 ./generate_deploy_run.sh $nnodes
 
