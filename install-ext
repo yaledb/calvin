@@ -51,5 +51,6 @@ make install
 cd ..
 
 
-# sudo echo 'LD_LIBRARY_PATH="/users/miaoyu/calvin/ext/protobuf/src/.libs:/users/miaoyu/calvin/ext/zookeeper/.libs:/users/miaoyu/calvin/ext/googletest/lib/.libs:/usr/local/lib:/usr/lib:/users/miaoyu/calvin/ext/zeromq/lib"' >> /etc/environment
-# sudo source /etc/environment
+uname='miaoyu'
+sudo echo 'LD_LIBRARY_PATH="/users/${uname}/calvin/ext/protobuf/src/.libs:/users/${uname}/calvin/ext/zookeeper/.libs:/users/${uname}/calvin/ext/googletest/lib/.libs:/usr/local/lib:/usr/lib:/users/${uname}/calvin/ext/zeromq/lib"' >> /etc/environment
+sudo source /etc/environment
