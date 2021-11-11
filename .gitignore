@@ -3,3 +3,5 @@ db/*
 ext/*
 obj/*
 src
+typescript
+typescript*

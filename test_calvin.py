@@ -55,23 +55,18 @@ def rename_portfile():
 
 
 if __name__ == "__main__":
-    # # test_config = [0,5,10,15,20,30,40,50,60,70,80,90,100]
-    # subprocess.run(['./propogate_settings.sh'])
-    # # subprocess.run(['sudo','chown','-R','miaoyu','/users/miaoyu/calvin'])
-    # test_config = [0]
-    # for config in test_config:
-    #     test_run_once(str(config),None)
 
     for nodes in [1,2,4,8,16,32]:
-        for warehouse in [1,2,4,8,16,32,64,128,256,512]:
+        for warehouse in [1,2,4,8,16,32,64,128]:
             update_settings(nodes,warehouse)
             for dist in [0,10,20,30,40,50,60,70,80,90,100]:
+                print(datetime.now())
                 test_run_once(nodes,dist,warehouse)
     
 
-    # for nodes in [4]:
-    #     for warehouse in [8,16]:
+    # for nodes in [32]:
+    #     for warehouse in [8]:
     #         update_settings(nodes,warehouse)
-    #         for dist in [0,10,20]:
+    #         for dist in [0]:
     #             test_run_once(nodes,dist,warehouse)
 
