@@ -1,5 +1,7 @@
 #!/bin/bash
 
+uname='miaoyu'
+
 # requires: autoconf  libtool  libreadline-dev
 
 sudo apt-get update
@@ -51,6 +53,6 @@ make install
 cd ..
 
 
-uname='miaoyu'
+
 sudo echo 'LD_LIBRARY_PATH="/users/${uname}/calvin/ext/protobuf/src/.libs:/users/${uname}/calvin/ext/zookeeper/.libs:/users/${uname}/calvin/ext/googletest/lib/.libs:/usr/local/lib:/usr/lib:/users/${uname}/calvin/ext/zeromq/lib"' >> /etc/environment
 sudo source /etc/environment
