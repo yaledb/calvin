@@ -11,7 +11,7 @@ cd ..
 
 # echo "# Node<id>=<replica>:<partition>:<cores>:<host>:<port>" > $fname
 for (( i = 1; i < nnodes; i++ )); do
-scp ./compile_calvin.sh miaoyu@node${i}:~/calvin
+# scp ./compile_calvin.sh miaoyu@node${i}:~/calvin
 scp ./deploy-run.conf miaoyu@node${i}:~/calvin
 scp ./src/applications/tpcc.h miaoyu@node${i}:~/calvin
 sleep 1

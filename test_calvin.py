@@ -56,17 +56,17 @@ def rename_portfile():
 
 if __name__ == "__main__":
 
-    for nodes in [1,2,4,8,16,32]:
-        for warehouse in [1,2,4,8,16,32,64,128]:
-            update_settings(nodes,warehouse)
-            for dist in [0,10,20,30,40,50,60,70,80,90,100]:
-                print(datetime.now())
-                test_run_once(nodes,dist,warehouse)
+    # for nodes in [1,2,4,8,16,32]:
+    #     for warehouse in [1,2,4,8,16,32,64,128]:
+    #         update_settings(nodes,warehouse)
+    #         for dist in [0,10,20,30,40,50,60,70,80,90,100]:
+    #             print(datetime.now())
+    #             test_run_once(nodes,dist,warehouse)
     
 
-    # for nodes in [32]:
-    #     for warehouse in [8]:
-    #         update_settings(nodes,warehouse)
-    #         for dist in [0]:
-    #             test_run_once(nodes,dist,warehouse)
+    for nodes in [32]:
+        for warehouse in [8]:
+            update_settings(nodes,warehouse)
+            for dist in [0]:
+                test_run_once(nodes,dist,warehouse)
 
