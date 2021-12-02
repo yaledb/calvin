@@ -48,7 +48,7 @@ mv googletest-release-1.6.0 googletest
 cd googletest
 mkdir build && cd build 
 cmake ../ && make -j
-cd ../..
+cd ../../
 
 # zeromq
 wget https://archive.org/download/zeromq_2.1.11/zeromq-2.1.11.tar.gz
@@ -57,13 +57,16 @@ rm zeromq-2.1.11.tar.gz
 mv zeromq-2.1.11 zeromq
 cd zeromq
 ./autogen.sh
-./configure --prefix=$PWD
+./configure --prefix=${absdir}/ext/zeromq/
 make -j
 # no need to install to other placd
 #sudo make install
 cd ..
 
 
+#ld_str="/users/${uname}/calvin/ext/protobuf/src/.libs:/users/${uname}/calvin/ext/zookeeper/.libs:/users/${uname}/calvin/ext/googletest/lib/.libs:/usr/local/lib:/usr/lib:/users/${uname}/calvin/ext/zeromq/lib"
 
-sudo echo LD_LIBRARY_PATH="/users/${uname}/calvin/ext/protobuf/src/.libs:/users/${uname}/calvin/ext/zookeeper/.libs:/users/${uname}/calvin/ext/googletest/lib/.libs:/usr/local/lib:/usr/lib:/users/${uname}/calvin/ext/zeromq/lib" >> /etc/environment
+ld_str="\"""/users/${uname}/calvin/ext/protobuf/src/.libs:/users/${uname}/calvin/ext/zookeeper/.libs:/users/${uname}/calvin/ext/googletest/lib/.libs:/usr/local/lib:/usr/lib:/users/${uname}/calvin/ext/zeromq/lib""\""
+echo LD_LIBRARY_PATH=${ld_str} | sudo tee -a /etc/environment
+
 sudo source /etc/environment

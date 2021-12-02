@@ -2,7 +2,7 @@
 
 nnodes=32
 
-
+uname=$(whoami)
 
 rm -r ~/calvin/bin ~/calvin/db ~/calvin/obj ~/calvin/src
 
@@ -18,7 +18,7 @@ DIR_SRC=~/calvin/src_traditional_2pl_2pc
 cp -a $DIR_SRC ~/calvin/src
 
 for (( i = 1; i < nnodes; i++ )); do
-ssh -p 22 miaoyu@node${i} "sudo chown -R miaoyu ~/calvin"
-ssh -p 22 miaoyu@node${i} "rm -r ~/calvin/bin ~/calvin/db ~/calvin/obj ~/calvin/src"
-ssh -p 22 miaoyu@node${i} "cp -a ${DIR_SRC} ~/calvin/src"
+ssh -p 22 ${uname}@node${i} "sudo chown -R ${uname} ~/calvin"
+ssh -p 22 ${uname}@node${i} "rm -r ~/calvin/bin ~/calvin/db ~/calvin/obj ~/calvin/src"
+ssh -p 22 ${uname}@node${i} "cp -a ${DIR_SRC} ~/calvin/src"
 done
