@@ -60,7 +60,7 @@ cd zeromq
 ./configure --prefix=${absdir}/ext/zeromq/
 make -j
 # no need to install to other placd
-#sudo make install
+sudo make install
 cd ..
 
 
