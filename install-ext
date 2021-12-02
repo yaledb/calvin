@@ -1,6 +1,11 @@
 #!/bin/bash
 
-uname='miaoyu'
+abshere=$(readlink -f "$BASH_SOURCE")
+absdir=$(dirname $abshere)
+
+cd $absdir
+
+uname=$(whoami)
 
 # requires: autoconf  libtool  libreadline-dev
 
@@ -49,10 +54,11 @@ cd zeromq
 ./autogen.sh
 ./configure --prefix=$PWD
 make -j
-make install
+# no need to install to other placd
+#sudo make install
 cd ..
 
 
 
-sudo echo 'LD_LIBRARY_PATH="/users/${uname}/calvin/ext/protobuf/src/.libs:/users/${uname}/calvin/ext/zookeeper/.libs:/users/${uname}/calvin/ext/googletest/lib/.libs:/usr/local/lib:/usr/lib:/users/${uname}/calvin/ext/zeromq/lib"' >> /etc/environment
+sudo echo LD_LIBRARY_PATH="/users/${uname}/calvin/ext/protobuf/src/.libs:/users/${uname}/calvin/ext/zookeeper/.libs:/users/${uname}/calvin/ext/googletest/lib/.libs:/usr/local/lib:/usr/lib:/users/${uname}/calvin/ext/zeromq/lib" >> /etc/environment
 sudo source /etc/environment
