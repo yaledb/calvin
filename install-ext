@@ -5,10 +5,10 @@ absdir=$(dirname $abshere)
 
 cd $absdir
 
-git pull << EOF
-yes
-yes
-EOF
+#git pull << EOF
+#yes
+#yes
+#EOF
 
 uname=$(whoami)
 
@@ -66,7 +66,7 @@ cd ..
 
 #ld_str="/users/${uname}/calvin/ext/protobuf/src/.libs:/users/${uname}/calvin/ext/zookeeper/.libs:/users/${uname}/calvin/ext/googletest/lib/.libs:/usr/local/lib:/usr/lib:/users/${uname}/calvin/ext/zeromq/lib"
 
-ld_str="\"""/users/${uname}/calvin/ext/protobuf/src/.libs:/users/${uname}/calvin/ext/zookeeper/.libs:/users/${uname}/calvin/ext/googletest/lib/.libs:/usr/local/lib:/usr/lib:/users/${uname}/calvin/ext/zeromq/lib""\""
-echo LD_LIBRARY_PATH=${ld_str} | sudo tee -a /etc/environment
+ld_str="/users/${uname}/calvin/ext/protobuf/src/.libs:/users/${uname}/calvin/ext/zookeeper/.libs:/users/${uname}/calvin/ext/googletest/lib/.libs:/usr/local/lib:/usr/lib:/users/${uname}/calvin/ext/zeromq/lib"
+echo LD_LIBRARY_PATH="\""${ld_str}"\"" | sudo tee -a /etc/environment
 
 sudo source /etc/environment
