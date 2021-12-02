@@ -64,9 +64,19 @@ if __name__ == "__main__":
     #             test_run_once(nodes,dist,warehouse)
     
 
-    for nodes in [32]:
-        for warehouse in [8]:
-            update_settings(nodes,warehouse)
-            for dist in [0]:
-                test_run_once(nodes,dist,warehouse)
+    #for nodes in [32]:
+    #    for warehouse in [8]:
+    #        update_settings(nodes,warehouse)
+    #        for dist in [0]:
+    #            test_run_once(nodes,dist,warehouse)
 
+    # test with abnormal configs
+    # list: [(node, wh), [dist1, dist2, ..], ...]
+    test_list = [[(16,4), [90, 100]], [(4, 4), [70]], [(32,4), [80, 90, 100]]]
+    for elem in test_list:
+        nodes = elem[0][0]
+        wh = elem[0][1]
+        update_settings(nodes, wh)
+        for dist in elem[1]:
+            test_run_once(nodes, dist, wh)
+    
