@@ -5,6 +5,11 @@ absdir=$(dirname $abshere)
 
 cd $absdir
 
+git pull << EOF
+yes
+yes
+EOF
+
 uname=$(whoami)
 
 # requires: autoconf  libtool  libreadline-dev
