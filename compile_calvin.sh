@@ -1,7 +1,8 @@
 #!/bin/bash
 
 mkdir -p ~/db3
-sudo chown -R $(whoami) ~/db3
+ls ~/
+#sudo chown -R ${uname} ~/db3
 
 mv ~/calvin/tpcc.h ~/calvin/src/applications
 

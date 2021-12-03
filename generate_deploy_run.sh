@@ -6,6 +6,6 @@ fname="deploy-run.conf"
 
 echo "# Node<id>=<replica>:<partition>:<cores>:<host>:<port>" > $fname
 for (( i = 0; i < nnodes; i++ )); do
-node=$(( i+1 ))
-echo "node${i}=0:${i}:${nnodes}:10.10.1.${node}:54564" >> $fname
+	node=$(( i+1 ))
+	echo "node${i}=0:${i}:${nnodes}:10.10.1.${node}:54564" >> $fname
 done
