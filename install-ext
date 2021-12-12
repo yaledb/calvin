@@ -26,7 +26,7 @@ rm zookeeper-3.4.6.tar.gz
 mv zookeeper-3.4.6/src/c zookeeper
 rm -fr zookeeper-3.4.6
 cd zookeeper
-./configure --prefix=${abshere}/ext/zookeeper/
+./configure --prefix=${absdir}/ext/zookeeper/
 make -j
 cd ..
 
@@ -36,7 +36,7 @@ tar xzf protobuf-2.6.1.tar.gz
 mv protobuf-2.6.1 protobuf
 cd protobuf
 ./autogen.sh
-./configure --prefix=${abshere}/ext/protobuf/
+./configure --prefix=${absdir}/ext/protobuf/
 make -j
 cd ..
 
@@ -66,8 +66,8 @@ cd ..
 
 #ld_str="/users/${uname}/calvin/ext/protobuf/src/.libs:/users/${uname}/calvin/ext/zookeeper/.libs:/users/${uname}/calvin/ext/googletest/lib/.libs:/usr/local/lib:/usr/lib:/users/${uname}/calvin/ext/zeromq/lib"
 
-ld_str="/users/${uname}/calvin/ext/protobuf/src/.libs:/users/${uname}/calvin/ext/zookeeper/.libs:/users/${uname}/calvin/ext/googletest/lib/.libs:/usr/local/lib:/usr/lib:/users/${uname}/calvin/ext/zeromq/lib"
-echo LD_LIBRARY_PATH="\""${ld_str}"\"" | sudo tee -a /etc/environment
+ld_str="/users/${uname}/calvin/ext/protobuf/src/.libs/:/users/${uname}/calvin/ext/zookeeper/.libs/:/users/${uname}/calvin/ext/googletest/lib/.libs/:/usr/local/lib/:/usr/lib/:/users/${uname}/calvin/ext/zeromq/lib/"
+echo LD_LIBRARY_PATH="\""${ld_str}"\"" | sudo tee /etc/environment
 
 #sudo source /etc/environment
 sudo bash -c "source /etc/environment"
