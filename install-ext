@@ -28,16 +28,21 @@ rm -fr zookeeper-3.4.6
 cd zookeeper
 ./configure --prefix=${absdir}/ext/zookeeper/
 make -j
+make install
 cd ..
 
 # protobuf
-wget https://github.com/protocolbuffers/protobuf/releases/download/v2.6.1/protobuf-2.6.1.tar.gz
-tar xzf protobuf-2.6.1.tar.gz
-mv protobuf-2.6.1 protobuf
+#wget https://github.com/protocolbuffers/protobuf/releases/download/v2.6.1/protobuf-2.6.1.tar.gz
+wget https://github.com/protocolbuffers/protobuf/releases/download/v2.4.1/protobuf-2.4.1.tar.gz
+#tar xzf protobuf-2.6.1.tar.gz
+tar xzf protobuf-2.4.1.tar.gz
+#mv protobuf-2.6.1 protobuf
+mv protobuf-2.4.1 protobuf
 cd protobuf
 ./autogen.sh
 ./configure --prefix=${absdir}/ext/protobuf/
 make -j
+make install
 cd ..
 
 # googletest
@@ -66,7 +71,7 @@ cd ..
 
 #ld_str="/users/${uname}/calvin/ext/protobuf/src/.libs:/users/${uname}/calvin/ext/zookeeper/.libs:/users/${uname}/calvin/ext/googletest/lib/.libs:/usr/local/lib:/usr/lib:/users/${uname}/calvin/ext/zeromq/lib"
 
-ld_str="/users/${uname}/calvin/ext/protobuf/src/.libs/:/users/${uname}/calvin/ext/zookeeper/.libs/:/users/${uname}/calvin/ext/googletest/lib/.libs/:/usr/local/lib/:/usr/lib/:/users/${uname}/calvin/ext/zeromq/lib/"
+ld_str="/users/${uname}/calvin/ext/protobuf/lib/:/users/${uname}/calvin/ext/zookeeper/lib/:/users/${uname}/calvin/ext/googletest/lib/.libs/:/usr/local/lib/:/usr/lib/:/users/${uname}/calvin/ext/zeromq/lib/"
 echo LD_LIBRARY_PATH="\""${ld_str}"\"" | sudo tee /etc/environment
 
 #sudo source /etc/environment
