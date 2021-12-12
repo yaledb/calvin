@@ -10,12 +10,15 @@
 #include <string>
 
 #include "backend/storage.h"
+#include "backend/simple_storage.h"
 #include "backend/storage_manager.h"
 #include "common/configuration.h"
 #include "common/utils.h"
 #include "proto/tpcc.pb.h"
 #include "proto/tpcc_args.pb.h"
+#include <iostream>
 
+using std::cout;
 using std::string;
 
 // ---- THIS IS A HACK TO MAKE ITEMS WORK ON LOCAL MACHINE ---- //
@@ -894,6 +897,7 @@ int TPCC::DeliveryTransaction(TxnProto* txn, StorageManager* storage) const {
 // through, indicating we should populate the database with fake data
 void TPCC::InitializeStorage(Storage* storage, Configuration* conf) const {
   // We create and write out all of the warehouses
+  // unordered_map<Key, Value> savedStock;
   for (int i = 0; i < (int)(WAREHOUSES_PER_NODE * conf->all_nodes.size()); i++) {
     // First, we create a key for the warehouse
     char warehouse_key[128], warehouse_key_ytd[128];
@@ -968,14 +972,25 @@ void TPCC::InitializeStorage(Storage* storage, Configuration* conf) const {
       assert(stock->SerializeToString(stock_value));
 
       // Finally, we pass it off to the storage manager to write to disk
-      if (conf->LookupPartition(stock->id()) == conf->this_node_id)
+      if (conf->LookupPartition(stock->id()) == conf->this_node_id){
+        // savedStock.insert({stock->id(), *stock_value});
         storage->PutObject(stock->id(), stock_value);
+      }
+        
       delete stock;
     }
 
     // Free storage
     delete warehouse;
   }
+
+  // Check saved stock against storage
+  //for (auto it= savedStock.begin(); it != savedStock.end(); it++){
+    // assert(*storage->ReadObject(it->first) == it->second);
+    // assert(*storage->ReadObject(it->first) != "");
+    
+  //}
+
 
   // Finally, all the items are initialized
   srand(1000);
@@ -993,6 +1008,14 @@ void TPCC::InitializeStorage(Storage* storage, Configuration* conf) const {
     SetItem(string(item_key), item_value);
     delete item;
   }
+  /*
+  // iterate all objects in storage
+  auto simpleStorage = static_cast<SimpleStorage*>(storage);
+  for (auto it = simpleStorage->objects_.begin(); it != simpleStorage->objects_.end(); it++){
+    cout << "key= "<<it->first<<", value="<<*(it->second)<<"\n";
+    assert(*(it->second) != "");
+  }
+  */
 }
 
 // The following method is a dumb constructor for the warehouse protobuffer

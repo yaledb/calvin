@@ -17,8 +17,18 @@ DIR_SRC=~/calvin/src_calvin
 
 cp -a $DIR_SRC ~/calvin/src
 
-for (( i = 1; i < nnodes; i++ )); do
+single_scp () {
+	i=$1
 	ssh -p 22 ${uname}@node${i} "sudo chown -R ${uname} ~/calvin"
 	ssh -p 22 ${uname}@node${i} "rm -r ~/calvin/bin ~/calvin/db ~/calvin/obj ~/calvin/src"
 	ssh -p 22 ${uname}@node${i} "cp -a ${DIR_SRC} ~/calvin/src"
+}
+
+for (( i = 1; i < nnodes; i++ )); do
+	single_scp $i &
+	#ssh -p 22 ${uname}@node${i} "sudo chown -R ${uname} ~/calvin"
+	#ssh -p 22 ${uname}@node${i} "rm -r ~/calvin/bin ~/calvin/db ~/calvin/obj ~/calvin/src"
+	#ssh -p 22 ${uname}@node${i} "cp -a ${DIR_SRC} ~/calvin/src"
 done
+
+wait
