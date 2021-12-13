@@ -15,10 +15,12 @@ cd ..
 single_scp () {
 	i=$1
 	scp ./deploy-run.conf ${uname}@node${i}:~/calvin
-	scp ./src/applications/tpcc.h ${uname}@node${i}:~/calvin
-	scp ./src/applications/tpcc.cc ${uname}@node${i}:~/calvin
-	scp ./src/backend/simple_storage.h ${uname}@node${i}:~/calvin
-	scp ./src/sequencer/sequencer.h ${uname}@node${i}:~/calvin
+	scp -r ./src/ ${uname}@node${i}:~/calvin
+	#scp ./src/applications/tpcc.h ${uname}@node${i}:~/calvin
+	#scp ./src/applications/tpcc.cc ${uname}@node${i}:~/calvin
+	#scp ./src/backend/simple_storage.h ${uname}@node${i}:~/calvin
+	#scp ./src/backend/simple_storage.cc ${uname}@node${i}:~/calvin
+	#scp ./src/sequencer/sequencer.h ${uname}@node${i}:~/calvin
 }
 
 for (( i = 1; i < nnodes; i++ )); do

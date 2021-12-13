@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import subprocess
 import time
 from tempfile import mkstemp
@@ -84,8 +86,8 @@ if __name__ == "__main__":
     # test_list = [[(16,4), [90, 100]], [(4, 4), [70]], [(32,4), [80, 90, 100]]]
     #test_list = [[(16,4), [60, 70, 80, 90, 100]], [(4, 4), [50, 60, 70, 80, 90]], [(32,4), [50, 60, 70, 80, 90, 100]]]
     #test_list = [[(32,4), [70, 90]]]
-    test_list = [[(32,4), [50]]]
-    #test_list = [[(32,4), [90]]]
+    #test_list = [[(32,32), [60, 70]]]
+    test_list = [[(32,32), [90]]]
     port_list = gen_port_list(test_list)
     index = 0
     for elem in test_list:
