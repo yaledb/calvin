@@ -6,11 +6,13 @@
 #include "backend/simple_storage.h"
 
 Value* SimpleStorage::ReadObject(const Key& key, int64 txn_id) {
+  //pthread_mutex_lock(&mutex_);
   if (objects_.count(key) != 0) {
     return objects_[key];
   } else {
     return NULL;
   }
+  //pthread_mutex_unlock(&mutex_);
 }
 
 bool SimpleStorage::PutObject(const Key& key, Value* value, int64 txn_id) {

@@ -8,13 +8,15 @@
 #define _DB_SCHEDULER_DETERMINISTIC_LOCK_MANAGER_H_
 
 #include <deque>
-#include <tr1/unordered_map>
+//#include <tr1/unordered_map>
+#include <unordered_map>
 
 #include "common/configuration.h"
 #include "scheduler/lock_manager.h"
 #include "common/utils.h"
 
-using std::tr1::unordered_map;
+//using std::tr1::unordered_map;
+using std::unordered_map;
 using std::deque;
 
 #define TABLE_SIZE 1000000

@@ -6,13 +6,15 @@
 #ifndef _DB_BACKEND_SIMPLE_STORAGE_H_
 #define _DB_BACKEND_SIMPLE_STORAGE_H_
 
-#include <tr1/unordered_map>
+//#include <tr1/unordered_map>
+#include <unordered_map>
 
 #include "backend/storage.h"
 #include "common/types.h"
 #include <pthread.h>
 
-using std::tr1::unordered_map;
+//using std::tr1::unordered_map;
+using std::unordered_map;
 
 class SimpleStorage : public Storage {
  public:

@@ -25,7 +25,8 @@
 #include <map>
 #include <string>
 #include <vector>
-#include <tr1/unordered_map>
+//#include <tr1/unordered_map>
+#include <unordered_map>
 #include <pthread.h>
 
 
@@ -35,7 +36,8 @@
 using std::map;
 using std::string;
 using std::vector;
-using std::tr1::unordered_map;
+//using std::tr1::unordered_map;
+using std::unordered_map;
 
 extern map<Key, Key> latest_order_id_for_customer;
 extern map<Key, int> latest_order_id_for_district;

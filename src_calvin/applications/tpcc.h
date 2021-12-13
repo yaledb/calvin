@@ -91,11 +91,11 @@ class TPCC : public Application {
 
   // The following methods are simple randomized initializers that provide us
   // fake data for our TPC-C function
-  Warehouse* CreateWarehouse(Key id) const;
-  District* CreateDistrict(Key id, Key warehouse_id) const;
-  Customer* CreateCustomer(Key id, Key district_id, Key warehouse_id) const;
+  static Warehouse* CreateWarehouse(Key id);
+  static District* CreateDistrict(Key id, Key warehouse_id);
+  static Customer* CreateCustomer(Key id, Key district_id, Key warehouse_id);
   Item* CreateItem(Key id) const;
-  Stock* CreateStock(Key id, Key warehouse_id) const;
+  static Stock* CreateStock(Key id, Key warehouse_id);
 
   // A NewOrder call takes a set of args and a transaction id and performs
   // the new order transaction as specified by TPC-C.  The return is 1 for

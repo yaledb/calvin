@@ -526,6 +526,7 @@ int TPCC::NewOrderTransaction(TxnProto* txn, StorageManager* storage) const {
 
     // Next, we get the correct stock from the data store
     Stock* stock = new Stock();
+    // assert(static_cast<SimpleStorage*>(storage)->CheckExist(stock_key));
     Value* stock_value = storage->ReadObject(stock_key);
     assert(stock->ParseFromString(*stock_value));
 
@@ -972,6 +973,7 @@ void TPCC::InitializeStorage(Storage* storage, Configuration* conf) const {
       assert(stock->SerializeToString(stock_value));
 
       // Finally, we pass it off to the storage manager to write to disk
+      assert(conf->LookupPartition(stock->id()) == conf->LookupPartition(warehouse_key));
       if (conf->LookupPartition(stock->id()) == conf->this_node_id){
         // savedStock.insert({stock->id(), *stock_value});
         storage->PutObject(stock->id(), stock_value);
@@ -1019,7 +1021,7 @@ void TPCC::InitializeStorage(Storage* storage, Configuration* conf) const {
 }
 
 // The following method is a dumb constructor for the warehouse protobuffer
-Warehouse* TPCC::CreateWarehouse(Key warehouse_key) const {
+Warehouse* TPCC::CreateWarehouse(Key warehouse_key) {
   Warehouse* warehouse = new Warehouse();
 
   // We initialize the id and the name fields
@@ -1040,7 +1042,7 @@ Warehouse* TPCC::CreateWarehouse(Key warehouse_key) const {
   return warehouse;
 }
 
-District* TPCC::CreateDistrict(Key district_key, Key warehouse_key) const {
+District* TPCC::CreateDistrict(Key district_key, Key warehouse_key) {
   District* district = new District();
 
   // We initialize the id and the name fields
@@ -1064,7 +1066,7 @@ District* TPCC::CreateDistrict(Key district_key, Key warehouse_key) const {
 }
 
 Customer* TPCC::CreateCustomer(Key customer_key, Key district_key,
-                               Key warehouse_key) const {
+                               Key warehouse_key) {
   Customer* customer = new Customer();
 
   // We initialize the various keys
@@ -1100,7 +1102,7 @@ Customer* TPCC::CreateCustomer(Key customer_key, Key district_key,
   return customer;
 }
 
-Stock* TPCC::CreateStock(Key item_key, Key warehouse_key) const {
+Stock* TPCC::CreateStock(Key item_key, Key warehouse_key) {
   Stock* stock = new Stock();
 
   // We initialize the various keys

@@ -14,8 +14,8 @@
 #include <set>
 #include <string>
 #include <vector>
-#include <tr1/unordered_map>
-
+//#include <tr1/unordered_map>
+#include <unordered_map>
 
 #include "common/zmq.hpp"
 #include "proto/message.pb.h"
@@ -25,7 +25,8 @@ using std::map;
 using std::set;
 using std::string;
 using std::vector;
-using std::tr1::unordered_map;
+//using std::tr1::unordered_map;
+using std::unordered_map;
 
 class Configuration;
 

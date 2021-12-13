@@ -8,13 +8,15 @@
 
 #include <climits>
 #include <cstring>
-#include <tr1/unordered_map>
+//#include <tr1/unordered_map>
+#include <unordered_map>
 
 #include "backend/versioned_storage.h"
 
 #define CHKPNTDIR "../db/checkpoints"
 
-using std::tr1::unordered_map;
+//using std::tr1::unordered_map;
+using std::unordered_map;
 
 struct DataNode {
   int64 txn_id;
