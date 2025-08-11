@@ -7,7 +7,8 @@
 #include <cstdio>
 #include <cstdlib>
 #include <vector>
-#include <string> // stringとIntToStringのために追加
+#include <string>
+#include <iostream>
 
 #include "applications/application.h"
 #include "applications/microbenchmark.h"
@@ -25,7 +26,7 @@
 #include "proto/tpcc_args.pb.h"
 #include "proto/txn.pb.h"
 
-// グローバル変数 (変更なし)
+// グローバル変数
 map<Key, Key> latest_order_id_for_customer;
 map<Key, int> latest_order_id_for_district;
 map<Key, int> smallest_order_id_for_district;
@@ -142,7 +143,7 @@ void stop(int sig)
 
 int main(int argc, char **argv)
 {
-    // 引数チェックとシグナルハンドラ設定 (変更なし)
+    // 引数チェックとシグナルハンドラ設定
     if (argc < 4)
     {
         fprintf(stderr, "Usage: %s <node-id> <m[icro]|t[pcc]|y[csb]> <percent_mp> [f for fetching]\n",
@@ -153,11 +154,11 @@ int main(int argc, char **argv)
     signal(SIGINT, &stop);
     signal(SIGTERM, &stop);
 
-    // 設定とマルチプレクサの構築 (変更なし)
+    // 設定とマルチプレクサの構築
     Configuration config(StringToInt(argv[1]), "deploy-run.conf");
     ConnectionMultiplexer multiplexer(&config);
 
-    // ApplicationとClientの生成 (変更なし)
+    // --- 1. ApplicationとStorageは全コンポーネントで共有 ---
     Application *application;
     if (argv[2][0] == 'm')
     {
@@ -181,21 +182,6 @@ int main(int argc, char **argv)
         exit(1);
     }
 
-    Client *client;
-    if (argv[2][0] == 'm')
-    {
-        client = new MClient(&config, atoi(argv[3]), application);
-    }
-    else if (argv[2][0] == 't')
-    {
-        client = new TClient(&config, atoi(argv[3]), application);
-    }
-    else
-    {
-        client = new YClient(&config, atoi(argv[3]), application);
-    }
-
-    // MutexとStorageの初期化 (変更なし)
     pthread_mutex_init(&mutex_, NULL);
     pthread_mutex_init(&mutex_for_item, NULL);
     involed_customers = new vector<Key>;
@@ -211,25 +197,48 @@ int main(int argc, char **argv)
     storage->Initmutex();
     application->InitializeStorage(storage, &config);
 
-    // ----------- ★★★ 修正箇所 ★★★ -----------
-    // R/W用と、複数のR/O用に通信路を生成する
-
-    // R/Wトランザクション用の通信路
+    // --- 2. Connectionも全コンポーネントで共有 ---
     Connection *rw_connection = multiplexer.NewConnection("scheduler_");
-
-    // 複数のR/Oトランザクション用通信路を生成
     vector<Connection *> *ro_connections = new vector<Connection *>();
     for (int i = 0; i < NUM_RO_DISPATCHERS; i++)
     {
-        // 各Dispatcherがリッスンする一意のチャネル名を作成
         string channel_name = "ro_scheduler_" + IntToString(i);
         ro_connections->push_back(multiplexer.NewConnection(channel_name));
     }
 
-    // シーケンサコンポーネントの初期化と起動
-    Sequencer sequencer(&config, rw_connection, ro_connections, client, storage);
+    // ----------- ★★★ ここからが修正の核心 ★★★ -----------
+    // --- 3. 複数のClientとSequencerを生成 ---
+    vector<Client *> clients;
+    vector<Sequencer *> sequencers;
 
-    // スケジューラをメインスレッドで実行
+    // definitions.hhで定義されたNUM_SEQUENCERSの数だけループ
+    for (int i = 0; i < NUM_SEQUENCERS; i++)
+    {
+        // Sequencerごとに独立したClientインスタンスを作成
+        Client *client;
+        if (argv[2][0] == 'm')
+        {
+            client = new MClient(&config, atoi(argv[3]), application);
+        }
+        else if (argv[2][0] == 't')
+        {
+            client = new TClient(&config, atoi(argv[3]), application);
+        }
+        else
+        {
+            client = new YClient(&config, atoi(argv[3]), application);
+        }
+        clients.push_back(client);
+
+        // Sequencerを生成し、ClientとConnection、そして自身のID(i)を渡す
+        // 注: この変更には、sequencer.hとsequencer.ccの修正が前提となります
+        Sequencer *sequencer = new Sequencer(&config, rw_connection, ro_connections, client, storage, i);
+        sequencers.push_back(sequencer);
+        std::cout << "Sequencer " << i << " created and started." << std::endl;
+    }
+
+    // --- 4. Schedulerは一つだけ生成 ---
+    // 全てのSequencerが、この一つのSchedulerにトランザクションを供給する
     DeterministicScheduler scheduler(&config,
                                      rw_connection,
                                      ro_connections,
@@ -241,12 +250,18 @@ int main(int argc, char **argv)
     Spin(180);
 
     // メモリ解放
-    delete client;
+    for (Client *c : clients)
+    {
+        delete c;
+    }
+    for (Sequencer *s : sequencers)
+    {
+        delete s;
+    }
     delete application;
     delete storage;
     delete involed_customers;
 
-    // ★★★ 追加：Connectionオブジェクトの解放 ★★★
     for (Connection *conn : *ro_connections)
     {
         delete conn;

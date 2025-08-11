@@ -56,30 +56,31 @@ Sequencer::Sequencer(Configuration *conf,
                      Connection *rw_connection,
                      vector<Connection *> *ro_connections,
                      Client *client,
-                     Storage *storage)
+                     Storage *storage,
+                     int sequencer_id)
     : epoch_duration_(EPOCH_DURATION),
       configuration_(conf),
       rw_connection_(rw_connection),
-      ro_connections_(ro_connections), // ★ メンバー変数を初期化
+      ro_connections_(ro_connections),
       client_(client),
       storage_(storage),
+      sequencer_id_(sequencer_id),
       deconstructor_invoked_(false)
 {
     pthread_mutex_init(&mutex_, NULL);
 
-    // (スレッド生成部分は変更なし)
     cpu_set_t cpuset;
     pthread_attr_t attr_writer;
     pthread_attr_init(&attr_writer);
     CPU_ZERO(&cpuset);
-    CPU_SET(SEQUENCER_WRITER_CORE, &cpuset);
+    CPU_SET(GET_SEQUENCER_WRITER_CORE(sequencer_id_), &cpuset);
     pthread_attr_setaffinity_np(&attr_writer, sizeof(cpu_set_t), &cpuset);
     pthread_create(&writer_thread_, &attr_writer, RunSequencerWriter, reinterpret_cast<void *>(this));
 
     pthread_attr_t attr_reader;
     pthread_attr_init(&attr_reader);
     CPU_ZERO(&cpuset);
-    CPU_SET(SEQUENCER_READER_CORE, &cpuset);
+    CPU_SET(GET_SEQUENCER_READER_CORE(sequencer_id_), &cpuset);
     pthread_attr_setaffinity_np(&attr_reader, sizeof(cpu_set_t), &cpuset);
     pthread_create(&reader_thread_, &attr_reader, RunSequencerReader, reinterpret_cast<void *>(this));
 }
@@ -131,19 +132,10 @@ double PrefetchAll(Storage *storage, TxnProto *txn)
 
 void Sequencer::RunWriter()
 {
-    PrintCpu("RunWriter", 0);
-
+    PrintCpu("Sequencer Writer", sequencer_id_);
     Spin(1);
 
-#ifdef PAXOS
-    Paxos paxos(ZOOKEEPER_CONF, false);
-#endif
-
-#ifdef PREFETCHING
-    multimap<double, TxnProto *> fetching_txns;
-#endif
-
-    // Synchronization loadgen start with other sequencers.
+    // 他ノードとの同期処理
     MessageProto synchronization_message;
     synchronization_message.set_type(MessageProto::EMPTY);
     synchronization_message.set_destination_channel("sequencer");
@@ -163,7 +155,7 @@ void Sequencer::RunWriter()
             synchronization_counter++;
         }
     }
-    std::cout << "Starting sequencer.\n"
+    std::cout << "Starting sequencer " << sequencer_id_ << ".\n"
               << std::flush;
 
     MessageProto batch;
@@ -172,23 +164,26 @@ void Sequencer::RunWriter()
     string batch_string;
     batch.set_type(MessageProto::TXN_BATCH);
 
-    for (int batch_number = configuration_->this_node_id; !deconstructor_invoked_;
-         batch_number += configuration_->all_nodes.size())
+    // ID衝突を避けるためのバッチ番号計算
+    int total_sequencers = configuration_->all_nodes.size() * NUM_SEQUENCERS;
+    int initial_batch_number = configuration_->this_node_id * NUM_SEQUENCERS + sequencer_id_;
+
+    for (int batch_number = initial_batch_number; !deconstructor_invoked_;
+         batch_number += total_sequencers)
     {
         double epoch_start = GetTime();
         batch.set_batch_number(batch_number);
         batch.clear_data();
 
         int txn_id_offset = 0;
-        while (!deconstructor_invoked_ &&
-               GetTime() < epoch_start + epoch_duration_)
+        while (!deconstructor_invoked_ && GetTime() < epoch_start + epoch_duration_)
         {
             if (batch.data_size() < MAX_LOCK_BATCH_SIZE)
             {
                 TxnProto *txn;
                 string txn_string;
-                client_->GetTxn(&txn,
-                                batch_number * MAX_LOCK_BATCH_SIZE + txn_id_offset);
+                int64_t txn_id = static_cast<int64_t>(batch_number) * MAX_LOCK_BATCH_SIZE + txn_id_offset;
+                client_->GetTxn(&txn, txn_id);
 
                 if (txn->txn_id() == -1)
                 {
@@ -196,10 +191,9 @@ void Sequencer::RunWriter()
                     continue;
                 }
 
-                // ここでタイムスタンプを設定
                 txn->set_sequencer_start_time(GetTime());
 
-                // トランザクションの中身を確認し、read_onlyフラグをSequencer自身が設定する
+                // read_onlyフラグをここで設定
                 if (txn->write_set_size() == 0 && txn->read_write_set_size() == 0)
                 {
                     txn->set_read_only(true);
@@ -225,14 +219,12 @@ void Sequencer::RunWriter()
         pthread_mutex_unlock(&mutex_);
 #endif
     }
-
     Spin(1);
 }
 
 void Sequencer::RunReader()
 {
-    PrintCpu("RunReader", 0);
-
+    PrintCpu("Sequencer Reader", sequencer_id_);
     Spin(1);
 #ifdef PAXOS
     Paxos paxos(ZOOKEEPER_CONF, true);
@@ -251,7 +243,6 @@ void Sequencer::RunReader()
     double time = GetTime();
     int txn_count = 0;
     int batch_count = 0;
-    int batch_number = configuration_->this_node_id;
     double total_ro_latency = 0.0;
     int ro_txn_count = 0;
 
@@ -281,14 +272,12 @@ void Sequencer::RunReader()
 
         MessageProto ro_batch_message;
         ro_batch_message.set_type(MessageProto::TXN_BATCH);
+        ro_batch_message.set_batch_number(batch_message.batch_number());
 
         string ro_channel_name = "ro_scheduler_" + IntToString(next_dispatcher);
         ro_batch_message.set_destination_channel(ro_channel_name);
         set<int> ro_dest_nodes;
 
-        // ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
-        // ★★★ ここにループの中身を正しく復元します ★★★
-        // ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
         for (int i = 0; i < batch_message.data_size(); i++)
         {
             TxnProto txn;
@@ -353,17 +342,15 @@ void Sequencer::RunReader()
         {
             if (it->second.data_size() > 0)
             {
-                it->second.set_batch_number(batch_number);
+                it->second.set_batch_number(batch_message.batch_number());
                 rw_connection_->Send(it->second);
                 it->second.clear_data();
             }
         }
-        batch_number += configuration_->all_nodes.size();
         batch_count++;
 
         if (GetTime() > time + 1)
         {
-#ifdef VERBOSE_SEQUENCER
             std::cout << "Submitted " << txn_count << " txns in " << batch_count
                       << " batches.\n";
             if (ro_txn_count > 0)
@@ -371,7 +358,6 @@ void Sequencer::RunReader()
                 double average_latency = total_ro_latency / ro_txn_count;
                 std::cout << "Average RO Txn Sequencer's latency for this epoch: " << average_latency << " seconds.\n";
             }
-#endif
             time = GetTime();
             txn_count = 0;
             batch_count = 0;

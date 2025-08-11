@@ -1,12 +1,10 @@
-// sequencer/sequencer.h (修正後)
-
 #ifndef _DB_SEQUENCER_SEQUENCER_H_
 #define _DB_SEQUENCER_SEQUENCER_H_
 
 #include <set>
 #include <string>
 #include <queue>
-#include <vector> // ★ vectorを追加
+#include <vector>
 
 #include "common/definitions.hh"
 
@@ -30,12 +28,13 @@ public:
 class Sequencer
 {
 public:
-    // ★ コンストラクタ: Connection* を vector<Connection*>* に変更
+    // ★ コンストラクタに sequencer_id を追加
     Sequencer(Configuration *conf,
               Connection *rw_connection,
               vector<Connection *> *ro_connections,
               Client *client,
-              Storage *storage);
+              Storage *storage,
+              int sequencer_id); // ★ sequencer_id を追加
 
     ~Sequencer();
 
@@ -48,13 +47,13 @@ private:
 
     double epoch_duration_;
     Configuration *configuration_;
-
-    // ★ メンバー変数: Connection* を vector<Connection*>* に変更
     Connection *rw_connection_;
-    vector<Connection *> *ro_connections_; // 複数のRO接続を保持
-
+    vector<Connection *> *ro_connections_;
     Client *client_;
     Storage *storage_;
+
+    int sequencer_id_; // ★ sequencer_id を保持するメンバー変数を追加
+
     pthread_t writer_thread_;
     pthread_t reader_thread_;
     bool deconstructor_invoked_;

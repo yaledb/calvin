@@ -6,26 +6,37 @@
 #define EPOCH_DURATION 0.01 // 0.01 is 10ms
 // =================================================
 
-// ============== 元のCalvin用設定 (NUMA完全分離版) ==============
-// ★ バックグラウンドをNode 1 (奇数)、ワーカーをNode 0 (偶数) に分離 ★
-// =============================================================
+// ============== 元のCalvin用設定 (Sequencer複数化・NUMA最適化版) ==============
+// ★ バックグラウンドをNode 1 (奇数)、ワーカーをNode 0 (偶数) 優先に分離 ★
+// =======================================================================
 
 // ============== server setting ==============
 #define NUM_CORE 0 // スクリプトで上書き
 
-// --- バックグラウンドスレッドの定義 (4つ) ---
-#define NUM_BACKGROUND_THREADS 4
-// バックグラウンドをNode 1 (奇数コア) にハードコードで割り当て
+// --- バックグラウンドスレッドの定義 ---
+#define NUM_SEQUENCERS 2           // スクリプトで上書きされる
+#define OTHER_BACKGROUND_THREADS 2 // Multiplexer, LockManager
+#define NUM_BACKGROUND_THREADS (OTHER_BACKGROUND_THREADS + (NUM_SEQUENCERS * 2))
+
+// バックグラウンドスレッドをNode 1 (奇数コア) に順に割り当て
 #define MULTIPLEXER_CORE 1
-#define SEQUENCER_WRITER_CORE 3
-#define SEQUENCER_READER_CORE 5
-#define LOCK_MANAGER_CORE 7
+#define LOCK_MANAGER_CORE 3
+#define GET_SEQUENCER_WRITER_CORE(i) (5 + ((i) * 4)) // Seq0=>5, Seq1=>9 ...
+#define GET_SEQUENCER_READER_CORE(i) (7 + ((i) * 4)) // Seq0=>7, Seq1=>11 ...
 
 // --- ワーカーの定義 ---
 #define NUM_WORKERS_CORE (NUM_CORE - NUM_BACKGROUND_THREADS)
 #define NUM_WORKERS (NUM_WORKERS_CORE)
-// ワーカーをNode 0 (偶数コア) に割り当て
-#define GET_WORKER_CORE(thread_id) ((thread_id) * 2)
+
+// ヘルパーマクロ
+#define NUM_EVEN_CORES ((NUM_CORE + 1) / 2)
+#define NUM_ODD_CORES (NUM_CORE / 2)
+
+// ワーカーを「低位偶数優先、その後、高位奇数を逆順」で割り当て
+#define GET_WORKER_CORE(thread_id)  \
+    (((thread_id) < NUM_EVEN_CORES) \
+         ? ((thread_id) * 2)        \
+         : ((NUM_ODD_CORES - 1 - ((thread_id) - NUM_EVEN_CORES)) * 2 + 1))
 // ==============================================
 
 // ============== database setting ==============
