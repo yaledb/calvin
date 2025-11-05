@@ -7,7 +7,6 @@
 
 #include "common/testing.h"
 
-
 TEST(FetchingStorageTest) {
   system("rm ../db/storage/*");
   FetchingStorage* storage = FetchingStorage::BuildStorage();
@@ -32,5 +31,3 @@ TEST(FetchingStorageTest) {
 int main(int argc, char** argv) {
   FetchingStorageTest();
 }
-
-

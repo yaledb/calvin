@@ -30,7 +30,9 @@ class Application {
   virtual ~Application() {}
 
   // Load generation.
-  virtual TxnProto* NewTxn(int64 txn_id, int txn_type, string args,
+  virtual TxnProto* NewTxn(int64 txn_id,
+                           int txn_type,
+                           string args,
                            Configuration* config) const = 0;
 
   // Static method to convert a key into an int for an array

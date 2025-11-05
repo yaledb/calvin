@@ -34,17 +34,12 @@ int Configuration::LookupPartition(const Key& key) const {
 bool Configuration::WriteToFile(const string& filename) const {
   FILE* fp = fopen(filename.c_str(), "w");
   if (fp == NULL)
-      return false;
+    return false;
   for (map<int, Node*>::const_iterator it = all_nodes.begin();
        it != all_nodes.end(); ++it) {
     Node* node = it->second;
-    fprintf(fp, "node%d=%d:%d:%d:%s:%d\n",
-            it->first,
-            node->replica_id,
-            node->partition_id,
-            node->cores,
-            node->host.c_str(),
-            node->port);
+    fprintf(fp, "node%d=%d:%d:%d:%s:%d\n", it->first, node->replica_id,
+            node->partition_id, node->cores, node->host.c_str(), node->port);
   }
   fclose(fp);
   return true;
@@ -88,11 +83,11 @@ void Configuration::ProcessConfigLine(char key[], char value[]) {
 
     // Parse additional node addributes.
     char* tok;
-    node->replica_id   = atoi(strtok_r(value, ":", &tok));
+    node->replica_id = atoi(strtok_r(value, ":", &tok));
     node->partition_id = atoi(strtok_r(NULL, ":", &tok));
-    node->cores        = atoi(strtok_r(NULL, ":", &tok));
-    const char* host   =      strtok_r(NULL, ":", &tok);
-    node->port         = atoi(strtok_r(NULL, ":", &tok));
+    node->cores = atoi(strtok_r(NULL, ":", &tok));
+    const char* host = strtok_r(NULL, ":", &tok);
+    node->port = atoi(strtok_r(NULL, ":", &tok));
 
     // Translate hostnames to IP addresses.
     string ip;
@@ -105,9 +100,8 @@ void Configuration::ProcessConfigLine(char key[], char value[]) {
         char buf[32];
         memmove(&n, ent->h_addr_list[0], ent->h_length);
         n = ntohl(n);
-        snprintf(buf, sizeof(buf), "%u.%u.%u.%u",
-            n >> 24, (n >> 16) & 0xff,
-            (n >> 8) & 0xff, n & 0xff);
+        snprintf(buf, sizeof(buf), "%u.%u.%u.%u", n >> 24, (n >> 16) & 0xff,
+                 (n >> 8) & 0xff, n & 0xff);
         ip = buf;
       }
     }
@@ -116,4 +110,3 @@ void Configuration::ProcessConfigLine(char key[], char value[]) {
     all_nodes[node->node_id] = node;
   }
 }
-

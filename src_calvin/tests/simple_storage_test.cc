@@ -23,5 +23,3 @@ TEST(SimpleStorageTest) {
 int main(int argc, char** argv) {
   SimpleStorageTest();
 }
-
-

@@ -40,8 +40,10 @@ class TxnProto;
 class StorageManager {
  public:
   // TODO(alex): Document this class correctly.
-  StorageManager(Configuration* config, Connection* connection,
-                 Storage* actual_storage, TxnProto* txn);
+  StorageManager(Configuration* config,
+                 Connection* connection,
+                 Storage* actual_storage,
+                 TxnProto* txn);
 
   ~StorageManager();
 
@@ -58,7 +60,7 @@ class StorageManager {
   // this node.
   bool writer;
 
-// private:
+  // private:
   friend class DeterministicScheduler;
 
   // Pointer to the configuration object for this node.
@@ -80,8 +82,6 @@ class StorageManager {
   unordered_map<Key, Value*> objects_;
 
   vector<Value*> remote_reads_;
-
 };
 
 #endif  // _DB_BACKEND_STORAGE_MANAGER_H_
-

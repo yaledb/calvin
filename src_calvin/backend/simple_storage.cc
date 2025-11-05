@@ -14,9 +14,9 @@ Value* SimpleStorage::ReadObject(const Key& key, int64 txn_id) {
 }
 
 bool SimpleStorage::PutObject(const Key& key, Value* value, int64 txn_id) {
-pthread_mutex_lock(&mutex_);
+  pthread_mutex_lock(&mutex_);
   objects_[key] = value;
-pthread_mutex_unlock(&mutex_);
+  pthread_mutex_unlock(&mutex_);
   return true;
 }
 

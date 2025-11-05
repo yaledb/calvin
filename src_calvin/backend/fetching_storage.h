@@ -15,14 +15,14 @@
 #include <cstring>
 #include <string>
 
+#include <signal.h>
+
 #include "common/utils.h"
 #include "backend/storage.h"
 #include "backend/simple_storage.h"
 
 #define PAGE_SIZE 1000
 #define STORAGE_PATH "../db/storage/"
-
-#define COLD_CUTOFF 990000
 
 class FetchingStorage : public Storage {
  public:
@@ -31,15 +31,13 @@ class FetchingStorage : public Storage {
   virtual Value* ReadObject(const Key& key, int64 txn_id = 0);
   virtual bool PutObject(const Key& key, Value* value, int64 txn_id = 0);
   virtual bool DeleteObject(const Key& key, int64 txn_id = 0);
-  virtual bool Prefetch(const Key &key, double* wait_time);
-  virtual bool Unfetch(const Key &key);
+  virtual bool Prefetch(const Key& key, double* wait_time);
+  virtual bool Unfetch(const Key& key);
   bool HardUnfetch(const Key& key);
 
   // Latch object that stores a counter for readlocks and a boolean for write
   // locks.
-  enum State {
-    UNINITIALIZED, IN_MEMORY, ON_DISK, FETCHING, RELEASING
-  };
+  enum State { UNINITIALIZED, IN_MEMORY, ON_DISK, FETCHING, RELEASING };
   class Latch {
    public:
     int active_requests;  // Can be as many as you want.
@@ -52,7 +50,7 @@ class FetchingStorage : public Storage {
       pthread_mutex_init(&lock_, NULL);
     }
   };
-  Latch* LatchFor(const Key &key);
+  Latch* LatchFor(const Key& key);
   static void PrefetchCompletionHandler(sigval_t sigval);
   static void UnfetchCompletionHandler(sigval_t sigval);
   static void GetKey(int fd, Key* key);
@@ -65,9 +63,7 @@ class FetchingStorage : public Storage {
    * is being placed here. After November 1, we can swap out backends.
    */
 
-  enum Operation {
-    FETCH, RELEASE
-  };
+  enum Operation { FETCH, RELEASE };
 
   // Registers an asynchronous read.
   bool FileRead(const Key& key, char* result, int size);
@@ -87,7 +83,7 @@ class FetchingStorage : public Storage {
   Latch* latches_;
 
   // GC thread stuff.
-  static void* RunGCThread(void *arg);
+  static void* RunGCThread(void* arg);
   pthread_t gc_thread_;
 };
 #endif  // _DB_BACKEND_FETCHING_STORAGE_H_

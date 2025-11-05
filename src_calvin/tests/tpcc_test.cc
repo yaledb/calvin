@@ -12,7 +12,7 @@
 // We make these global variables to avoid weird pointer passing and code
 // redundancy
 Configuration* config =
-  new Configuration(0, "common/configuration_test_one_node.conf");
+    new Configuration(0, "common/configuration_test_one_node.conf");
 ConnectionMultiplexer* multiplexer;
 Connection* connection;
 SimpleStorage* simple_store;
@@ -22,10 +22,9 @@ TPCC* tpcc;
 TEST(IdGenerationTest) {
   EXPECT_EQ(tpcc->CheckpointID("w1"), 1);
   EXPECT_EQ(tpcc->CheckpointID("d1"), WAREHOUSES_PER_NODE + 1);
-  EXPECT_EQ(tpcc->CheckpointID("c1"), WAREHOUSES_PER_NODE +
-                                               DISTRICTS_PER_NODE + 1);
-  EXPECT_EQ(tpcc->CheckpointID("w2si1"),
-                               1000000 + 2 * NUMBER_OF_ITEMS + 1);
+  EXPECT_EQ(tpcc->CheckpointID("c1"),
+            WAREHOUSES_PER_NODE + DISTRICTS_PER_NODE + 1);
+  EXPECT_EQ(tpcc->CheckpointID("w2si1"), 1000000 + 2 * NUMBER_OF_ITEMS + 1);
   EXPECT_EQ(tpcc->CheckpointID("i1"), 3000001);
   EXPECT_EQ(tpcc->CheckpointID("ol1"), 4000001);
   EXPECT_EQ(tpcc->CheckpointID("no1"), 5000001);
@@ -217,8 +216,7 @@ TEST(InitializeTest) {
     for (int j = 0; j < DISTRICTS_PER_WAREHOUSE; j++) {
       char district_key[128];
       Value* district_value;
-      snprintf(district_key, sizeof(district_key), "w%dd%d",
-               i, j);
+      snprintf(district_key, sizeof(district_key), "w%dd%d", i, j);
       district_value = simple_store->ReadObject(district_key);
 
       District* dummy_district = new District();
@@ -229,8 +227,7 @@ TEST(InitializeTest) {
       for (int k = 0; k < CUSTOMERS_PER_DISTRICT; k++) {
         char customer_key[128];
         Value* customer_value;
-        snprintf(customer_key, sizeof(customer_key),
-                 "w%dd%dc%d", i, j, k);
+        snprintf(customer_key, sizeof(customer_key), "w%dd%dc%d", i, j, k);
         customer_value = simple_store->ReadObject(customer_key);
 
         Customer* dummy_customer = new Customer();
@@ -244,8 +241,7 @@ TEST(InitializeTest) {
       char item_key[128], stock_key[128];
       Value* stock_value;
       snprintf(item_key, sizeof(item_key), "i%d", j);
-      snprintf(stock_key, sizeof(stock_key), "%ss%s",
-               warehouse_key, item_key);
+      snprintf(stock_key, sizeof(stock_key), "%ss%s", warehouse_key, item_key);
       stock_value = simple_store->ReadObject(stock_key);
 
       Stock* dummy_stock = new Stock();
@@ -256,14 +252,14 @@ TEST(InitializeTest) {
 
   // Expect all items to be there
   for (int i = 0; i < NUMBER_OF_ITEMS; i++) {
-      char item_key[128];
-      Value item_value;
-      snprintf(item_key, sizeof(item_key), "i%d", i);
-      item_value = *(tpcc->GetItem(string(item_key)));
+    char item_key[128];
+    Value item_value;
+    snprintf(item_key, sizeof(item_key), "i%d", i);
+    item_value = *(tpcc->GetItem(string(item_key)));
 
-      Item* dummy_item = new Item();
-      EXPECT_TRUE(dummy_item->ParseFromString(item_value));
-      delete dummy_item;
+    Item* dummy_item = new Item();
+    EXPECT_TRUE(dummy_item->ParseFromString(item_value));
+    delete dummy_item;
   }
 
   END;
@@ -292,11 +288,11 @@ TEST(NewOrderTest) {
 
   txn->add_readers(0);
   txn->add_writers(0);
-  StorageManager* storage = new StorageManager(config, connection, simple_store,
-                                               txn);
+  StorageManager* storage =
+      new StorageManager(config, connection, simple_store, txn);
 
   // Prefetch some values in order to ensure our ACIDity after
-  District *district = new District();
+  District* district = new District();
   Value* district_value;
   district_value = storage->ReadObject(txn->read_write_set(0));
   assert(district->ParseFromString(*district_value));
@@ -403,15 +399,15 @@ TEST(NewOrderTest) {
     // Check the order line
     // TODO(Thad): Get order_line_ptr from Order protobuf and deserialize from
     // there
-//    Value* order_line_value;
-//    OrderLine* order_line = new OrderLine();
-//    order_line_value = storage->ReadObject(txn->write_set(i));
-//    EXPECT_TRUE(order_line->ParseFromString(*order_line_value));
-//    EXPECT_EQ(order_line->amount(), item->price() * txn_args->quantities(i));
-//    EXPECT_EQ(order_line->number(), i);
+    //    Value* order_line_value;
+    //    OrderLine* order_line = new OrderLine();
+    //    order_line_value = storage->ReadObject(txn->write_set(i));
+    //    EXPECT_TRUE(order_line->ParseFromString(*order_line_value));
+    //    EXPECT_EQ(order_line->amount(), item->price() *
+    //    txn_args->quantities(i)); EXPECT_EQ(order_line->number(), i);
 
     // Free memory
-//    delete order_line;
+    //    delete order_line;
     delete item;
     delete stock;
   }
@@ -447,25 +443,25 @@ TEST(PaymentTest) {
   txn->add_read_set(txn->write_set(0));
   txn->add_readers(0);
   txn->add_writers(0);
-  StorageManager* storage = new StorageManager(config, connection, simple_store,
-                                               txn);
+  StorageManager* storage =
+      new StorageManager(config, connection, simple_store, txn);
 
   // Prefetch some values in order to ensure our ACIDity after
-  Warehouse *warehouse = new Warehouse();
+  Warehouse* warehouse = new Warehouse();
   Value* warehouse_value;
   warehouse_value = storage->ReadObject(txn->read_write_set(0));
   assert(warehouse->ParseFromString(*warehouse_value));
   int old_warehouse_year_to_date = warehouse->year_to_date();
 
   // Prefetch district
-  District *district = new District();
+  District* district = new District();
   Value* district_value;
   district_value = storage->ReadObject(txn->read_write_set(1));
   assert(district->ParseFromString(*district_value));
   int old_district_year_to_date = district->year_to_date();
 
   // Preetch customer
-  Customer *customer = new Customer();
+  Customer* customer = new Customer();
   Value* customer_value;
   customer_value = storage->ReadObject(txn->read_write_set(2));
   assert(customer->ParseFromString(*customer_value));
@@ -488,10 +484,10 @@ TEST(PaymentTest) {
   assert(customer->ParseFromString(*customer_value));
 
   // Check the old values against the new
-  EXPECT_EQ(warehouse->year_to_date(), old_warehouse_year_to_date +
-            txn_args->amount());
-  EXPECT_EQ(district->year_to_date(), old_district_year_to_date +
-            txn_args->amount());
+  EXPECT_EQ(warehouse->year_to_date(),
+            old_warehouse_year_to_date + txn_args->amount());
+  EXPECT_EQ(district->year_to_date(),
+            old_district_year_to_date + txn_args->amount());
   EXPECT_EQ(customer->year_to_date_payment(),
             old_customer_year_to_date_payment + txn_args->amount());
   EXPECT_EQ(customer->balance(), old_customer_balance - txn_args->amount());
@@ -574,4 +570,3 @@ int main(int argc, char** argv) {
 
   return 0;
 }
-

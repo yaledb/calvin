@@ -2,50 +2,63 @@
 
 # requires: autoconf, libtool, libreadline-dev
 
+sudo apt-get update
+sudo apt install unzip libtool libtool-bin uuid-dev python-is-python3 python2
+sudo ln -sf /usr/bin/python2 /usr/bin/python # google test ?
+
+rm -rf ext
 mkdir ext
 cd ext
 
 #zookeeper
-wget http://apache.mirrors.tds.net/zookeeper/current/zookeeper-3.4.6.tar.gz
+wget https://archive.apache.org/dist/zookeeper/zookeeper-3.4.6/zookeeper-3.4.6.tar.gz
 tar xzf zookeeper-3.4.6.tar.gz
 rm zookeeper-3.4.6.tar.gz
 mv zookeeper-3.4.6/src/c zookeeper
 rm -fr zookeeper-3.4.6
 cd zookeeper
-./configure --prefix=$PWD
+./configure --prefix=$PWD CFLAGS="-Wno-format-overflow -g -O2 -D_GNU_SOURCE"
 make -j
 cd ..
 
 # protobuf
-svn checkout http://protobuf.googlecode.com/svn/trunk/ protobuf
+wget https://github.com/protocolbuffers/protobuf/releases/download/v2.5.0/protobuf-2.5.0.tar.gz
+tar xzf protobuf-2.5.0.tar.gz
+rm protobuf-2.5.0.tar.gz
+mv protobuf-2.5.0 protobuf
 cd protobuf
-./autogen.sh
-./configure --prefix=$PWD
+./configure --prefix=$PWD --enable-debug
 make -j
 cd ..
 
 # googletest
-wget http://googletest.googlecode.com/files/gtest-1.6.0.zip
+wget https://storage.googleapis.com/google-code-archive-downloads/v2/code.google.com/googletest/gtest-1.6.0.zip
 unzip gtest-1.6.0.zip
 rm gtest-1.6.0.zip
 mv gtest-1.6.0 googletest
 cd googletest
-./configure --prefix=$PWD
+./configure --prefix=$PWD --enable-debug
 make -j
 cd ..
 
 
 # zeromq
-wget http://download.zeromq.org/zeromq-2.1.11.tar.gz
-tar xzf zeromq-2.1.11.tar.gz
-rm zeromq-2.1.11.tar.gz
-mv zeromq-2.1.11 zeromq
+git clone https://github.com/zeromq/zeromq2-x.git
+cd zeromq2-x
+git checkout v2.1.11
+cd ../
+mv zeromq2-x zeromq
 cd zeromq
 ./autogen.sh
-./configure --prefix=$PWD
+./configure --prefix=$PWD --enable-debug
 make -j
 make install
 cd ..
 
 
 
+
+
+# export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:~/calvin/ext/protobuf/src/.libs
+# export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:~/calvin/ext/zookeeper/.libs
+# export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:~/calvin/ext/zeromq/src/.libs

@@ -4,6 +4,7 @@
 // main memory, disk, and swapping algorithms.
 
 #include "backend/fetching_storage.h"
+#include "common/definitions.hh"
 
 typedef FetchingStorage::Latch Latch;
 
@@ -26,8 +27,7 @@ FetchingStorage::FetchingStorage() {
   // 1 MILLION LATCHES!
   latches_ = new Latch[1000000];
 
-  pthread_create(&gc_thread_, NULL, RunGCThread,
-    reinterpret_cast<void*>(this));
+  pthread_create(&gc_thread_, NULL, RunGCThread, reinterpret_cast<void*>(this));
 }
 
 FetchingStorage::~FetchingStorage() {
@@ -45,22 +45,22 @@ Latch* FetchingStorage::LatchFor(const Key& key) {
 }
 
 void FetchingStorage::GetKey(int fd, Key* key) {
-    char path[255];
-    snprintf(path, sizeof(path), "/proc/self/fd/%d", fd);
-    char key_c_str[255];
-    memset(&key_c_str, 0, 255);
-    readlink(path, key_c_str, 255);
-    *key = string((strrchr(key_c_str, '/') + 1));
+  char path[255];
+  snprintf(path, sizeof(path), "/proc/self/fd/%d", fd);
+  char key_c_str[255];
+  memset(&key_c_str, 0, 255);
+  readlink(path, key_c_str, 255);
+  *key = string((strrchr(key_c_str, '/') + 1));
 }
 
-void* FetchingStorage::RunGCThread(void *arg) {
+void* FetchingStorage::RunGCThread(void* arg) {
   FetchingStorage* storage = reinterpret_cast<FetchingStorage*>(arg);
   while (true) {
     double start_time = GetTime();
     for (int i = COLD_CUTOFF; i < 1000000; i++) {
       storage->HardUnfetch(IntToString(i));
     }
-    usleep(static_cast<int>(1000000*(GetTime()-start_time)));
+    usleep(static_cast<int>(1000000 * (GetTime() - start_time)));
   }
   return NULL;
 }
@@ -77,7 +77,8 @@ Value* FetchingStorage::ReadObject(const Key& key, int64 txn_id) {
   assert(latch->active_requests > 0);
   pthread_mutex_unlock(&latch->lock_);
   // Block thread until pre-fetch on this key is done.
-  while (latch->state == FETCHING) {}
+  while (latch->state == FETCHING) {
+  }
   return main_memory_->ReadObject(key);
 }
 
@@ -157,7 +158,7 @@ bool FetchingStorage::HardUnfetch(const Key& key) {
   if (active_requests == 0 && previous_state == IN_MEMORY) {
     Value* result = main_memory_->ReadObject(key);
     int len = strlen(result->c_str());
-    char* c_result = new char[len+1];
+    char* c_result = new char[len + 1];
     strcpy(c_result, result->c_str());
     return FilePut(key, c_result, len);
   } else {
@@ -182,8 +183,8 @@ bool FetchingStorage::Unfetch(const Key& key) {
 ///////////////// Asynchronous Callbacks ////////////////////////
 
 void FetchingStorage::PrefetchCompletionHandler(sigval_t sigval) {
-  struct aiocb *req;
-  req = (struct aiocb *)sigval.sival_ptr;
+  struct aiocb* req;
+  req = (struct aiocb*)sigval.sival_ptr;
   /* Did the request complete? */
   if (aio_error(req) == 0) {
     /* Request completed successfully, get the return status */
@@ -209,8 +210,8 @@ void FetchingStorage::PrefetchCompletionHandler(sigval_t sigval) {
 }
 
 void FetchingStorage::UnfetchCompletionHandler(sigval_t sigval) {
-  struct aiocb *req;
-  req = (struct aiocb *)sigval.sival_ptr;
+  struct aiocb* req;
+  req = (struct aiocb*)sigval.sival_ptr;
   /* Did the request complete? */
   if (aio_error(req) == 0) {
     /* Request completed successfully, get the return status */
@@ -225,8 +226,8 @@ void FetchingStorage::UnfetchCompletionHandler(sigval_t sigval) {
     State state = latch->state;
     pthread_mutex_unlock(&latch->lock_);
     if (state == RELEASING && active_requests <= 0) {
-       store->main_memory_->DeleteObject(key);
-       latch->state = ON_DISK;
+      store->main_memory_->DeleteObject(key);
+      latch->state = ON_DISK;
     }
     close(req->aio_fildes);
     delete[] reinterpret_cast<volatile char*>(req->aio_buf);
@@ -242,7 +243,7 @@ void FetchingStorage::UnfetchCompletionHandler(sigval_t sigval) {
 bool FetchingStorage::FileRead(const Key& key, char* result, int size) {
   string fileName(STORAGE_PATH);
   fileName.append(key);
-  int fd = open(fileName.c_str(), O_RDONLY|O_NONBLOCK);
+  int fd = open(fileName.c_str(), O_RDONLY | O_NONBLOCK);
   if (fd == -1)
     return false;
   return aio_read(generateControlBlock(fd, result, size, FETCH)) >= 0;
@@ -252,14 +253,17 @@ bool FetchingStorage::FilePut(const Key& key, char* value, int size) {
   string fileName(STORAGE_PATH);
   fileName.append(key);
   mode_t mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH;
-  int fd = open(fileName.c_str(), O_RDWR|O_CREAT|O_TRUNC|O_NONBLOCK, mode);
+  int fd =
+      open(fileName.c_str(), O_RDWR | O_CREAT | O_TRUNC | O_NONBLOCK, mode);
   if (fd == -1)
     return false;
   return aio_write(generateControlBlock(fd, value, size, RELEASE)) >= 0;
 }
 
-aiocb* FetchingStorage::generateControlBlock(
-    int fd, char* buf, const int size, Operation op) {
+aiocb* FetchingStorage::generateControlBlock(int fd,
+                                             char* buf,
+                                             const int size,
+                                             Operation op) {
   aiocb* aiocbp = new aiocb();
   aiocbp->aio_fildes = fd;
   aiocbp->aio_offset = 0;
@@ -269,11 +273,9 @@ aiocb* FetchingStorage::generateControlBlock(
   /* Link the AIO request with a thread callback */
   aiocbp->aio_sigevent.sigev_notify = SIGEV_THREAD;
   if (op == FETCH)
-    aiocbp->aio_sigevent.sigev_notify_function =
-        &PrefetchCompletionHandler;
+    aiocbp->aio_sigevent.sigev_notify_function = &PrefetchCompletionHandler;
   else
-    aiocbp->aio_sigevent.sigev_notify_function =
-        &UnfetchCompletionHandler;
+    aiocbp->aio_sigevent.sigev_notify_function = &UnfetchCompletionHandler;
   aiocbp->aio_sigevent.sigev_notify_attributes = NULL;
   aiocbp->aio_sigevent.sigev_value.sival_ptr = aiocbp;
   return aiocbp;

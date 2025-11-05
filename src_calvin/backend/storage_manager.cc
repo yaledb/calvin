@@ -12,10 +12,14 @@
 #include "proto/txn.pb.h"
 #include "proto/message.pb.h"
 
-StorageManager::StorageManager(Configuration* config, Connection* connection,
-                               Storage* actual_storage, TxnProto* txn)
-    : configuration_(config), connection_(connection),
-      actual_storage_(actual_storage), txn_(txn) {
+StorageManager::StorageManager(Configuration* config,
+                               Connection* connection,
+                               Storage* actual_storage,
+                               TxnProto* txn)
+    : configuration_(config),
+      connection_(connection),
+      actual_storage_(actual_storage),
+      txn_(txn) {
   MessageProto message;
 
   // If reads are performed at this node, execute local reads and broadcast
@@ -111,4 +115,3 @@ bool StorageManager::DeleteObject(const Key& key) {
   else
     return true;  // Not this node's problem.
 }
-

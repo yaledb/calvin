@@ -24,7 +24,11 @@ using std::tr1::unordered_map;
 
 #define ASSERTS_ON true
 
-#define DCHECK(ARG) do { if (ASSERTS_ON) assert(ARG); } while (0)
+#define DCHECK(ARG) \
+  do {              \
+    if (ASSERTS_ON) \
+      assert(ARG);  \
+  } while (0)
 
 // Status code for return values.
 struct Status {
@@ -50,9 +54,12 @@ struct Status {
   // Pretty printing.
   string ToString() {
     string out;
-    if (code == ERROR) out.append("Error");
-    if (code == OKAY) out.append("Okay");
-    if (code == DONE) out.append("Done");
+    if (code == ERROR)
+      out.append("Error");
+    if (code == OKAY)
+      out.append("Okay");
+    if (code == DONE)
+      out.append("Done");
     if (message.size()) {
       out.append(": ");
       out.append(message);
@@ -66,19 +73,20 @@ struct Status {
 static inline double GetTime() {
   struct timeval tv;
   gettimeofday(&tv, NULL);
-  return tv.tv_sec + tv.tv_usec/1e6;
+  return tv.tv_sec + tv.tv_usec / 1e6;
 }
 
 // Busy-wait for 'duration' seconds.
 static inline void Spin(double duration) {
   usleep(1000000 * duration);
-//  double start = GetTime();
-//  while (GetTime() < start + duration) {}
+  //  double start = GetTime();
+  //  while (GetTime() < start + duration) {}
 }
 
 // Busy-wait until GetTime() >= time.
 static inline void SpinUntil(double time) {
-  while (GetTime() >= time) {}
+  while (GetTime() >= time) {
+  }
 }
 
 // Produces a random alphabet string of the specified length
@@ -113,8 +121,8 @@ static inline double StringToDouble(const string& s) {
 }
 
 static inline double RandomDoubleBetween(double fMin, double fMax) {
-  double f = (double)rand()/RAND_MAX;
-  return fMin + f*(fMax - fMin);
+  double f = (double)rand() / RAND_MAX;
+  return fMin + f * (fMax - fMin);
 }
 
 // Converts a human-readable numeric sub-string (starting at the 'n'th position
@@ -139,9 +147,7 @@ static inline void Noop(void* data, void* hint) {}
 class Mutex {
  public:
   // Mutexes come into the world unlocked.
-  Mutex() {
-    pthread_mutex_init(&mutex_, NULL);
-  }
+  Mutex() { pthread_mutex_init(&mutex_, NULL); }
 
  private:
   friend class Lock;
@@ -158,9 +164,7 @@ class Lock {
   explicit Lock(Mutex* mutex) : mutex_(mutex) {
     pthread_mutex_lock(&mutex_->mutex_);
   }
-  ~Lock() {
-    pthread_mutex_unlock(&mutex_->mutex_);
-  }
+  ~Lock() { pthread_mutex_unlock(&mutex_->mutex_); }
 
  private:
   Mutex* mutex_;
@@ -175,7 +179,7 @@ class Lock {
 
 ////////////////////////////////////////////////////////////////
 
-template<typename T>
+template <typename T>
 class AtomicQueue {
  public:
   AtomicQueue() {
@@ -192,21 +196,19 @@ class AtomicQueue {
   }
 
   // Returns true iff the queue is empty.
-  inline bool Empty() {
-    return front_ == back_;
-  }
+  inline bool Empty() { return front_ == back_; }
 
   // Atomically pushes 'item' onto the queue.
   inline void Push(const T& item) {
     Lock l(&back_mutex_);
     // Check if the buffer has filled up. Acquire all locks and resize if so.
-    if (front_ == (back_+1) % size_) {
+    if (front_ == (back_ + 1) % size_) {
       Lock m(&front_mutex_);
       Lock n(&size_mutex_);
       uint32 count = (back_ + size_ - front_) % size_;
       queue_.resize(size_ * 2);
       for (uint32 i = 0; i < count; i++) {
-        queue_[size_+i] = queue_[(front_ + i) % size_];
+        queue_[size_ + i] = queue_[(front_ + i) % size_];
       }
       front_ = size_;
       back_ = size_ + count;
@@ -260,9 +262,7 @@ class AtomicQueue {
 class MutexRW {
  public:
   // Mutexes come into the world unlocked.
-  MutexRW() {
-    pthread_rwlock_init(&mutex_, NULL);
-  }
+  MutexRW() { pthread_rwlock_init(&mutex_, NULL); }
 
  private:
   friend class ReadLock;
@@ -280,9 +280,7 @@ class ReadLock {
   explicit ReadLock(MutexRW* mutex) : mutex_(mutex) {
     pthread_rwlock_rdlock(&mutex_->mutex_);
   }
-  ~ReadLock() {
-    pthread_rwlock_unlock(&mutex_->mutex_);
-  }
+  ~ReadLock() { pthread_rwlock_unlock(&mutex_->mutex_); }
 
  private:
   MutexRW* mutex_;
@@ -300,9 +298,7 @@ class WriteLock {
   explicit WriteLock(MutexRW* mutex) : mutex_(mutex) {
     pthread_rwlock_wrlock(&mutex_->mutex_);
   }
-  ~WriteLock() {
-    pthread_rwlock_unlock(&mutex_->mutex_);
-  }
+  ~WriteLock() { pthread_rwlock_unlock(&mutex_->mutex_); }
 
  private:
   MutexRW* mutex_;
@@ -315,7 +311,7 @@ class WriteLock {
   WriteLock& operator=(const WriteLock&);
 };
 
-template<typename K, typename V>
+template <typename K, typename V>
 class AtomicMap {
  public:
   AtomicMap() {}
@@ -362,7 +358,7 @@ class AtomicMap {
   inline void DeleteVAndClear() {
     WriteLock l(&mutex_);
     for (typename unordered_map<K, V>::iterator it = map_.begin();
-       it != map_.end(); ++it) {
+         it != map_.end(); ++it) {
       delete it->second;
     }
     map_.clear();
@@ -378,4 +374,3 @@ class AtomicMap {
 };
 
 #endif  // _DB_COMMON_UTILS_H_
-

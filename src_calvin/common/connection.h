@@ -16,7 +16,6 @@
 #include <vector>
 #include <tr1/unordered_map>
 
-
 #include "common/zmq.hpp"
 #include "proto/message.pb.h"
 #include "common/utils.h"
@@ -47,8 +46,9 @@ class ConnectionMultiplexer {
   // the channel name is already in use, in which case NULL is returned. The
   // caller (not the multiplexer) owns of the newly created Connection object.
   Connection* NewConnection(const string& channel);
-  
-  Connection* NewConnection(const string& channel, AtomicQueue<MessageProto>** aa);
+
+  Connection* NewConnection(const string& channel,
+                            AtomicQueue<MessageProto>** aa);
 
   zmq::context_t* context() { return &context_; }
 
@@ -60,7 +60,7 @@ class ConnectionMultiplexer {
   void Run();
 
   // Function to call multiplexer->Run() in a new pthread.
-  static void* RunMultiplexer(void *multiplexer);
+  static void* RunMultiplexer(void* multiplexer);
 
   // TODO(alex): Comments.
   void Send(const MessageProto& message);
@@ -92,9 +92,9 @@ class ConnectionMultiplexer {
   // Sockets for forwarding messages to Connections. Keyed by channel
   // name. Type = ZMQ_PUSH.
   unordered_map<string, zmq::socket_t*> inproc_out_;
-  
+
   unordered_map<string, AtomicQueue<MessageProto>*> remote_result_;
-  
+
   unordered_map<string, AtomicQueue<MessageProto>*> link_unlink_queue_;
 
   // Stores messages addressed to local channels that do not exist at the time
@@ -106,9 +106,9 @@ class ConnectionMultiplexer {
 
   // Protects concurrent calls to NewConnection().
   pthread_mutex_t new_connection_mutex_;
-  
+
   pthread_mutex_t* send_mutex_;
-  
+
   // Specifies a requested channel. Null if there is no outstanding new
   // connection request.
   const string* new_connection_channel_;
@@ -137,7 +137,7 @@ class Connection {
   // Sends 'message' to the Connection specified by
   // 'message.destination_node()' and 'message.destination_channel()'.
   void Send(const MessageProto& message);
-  
+
   void Send1(const MessageProto& message);
 
   // Loads the next incoming MessageProto into 'message'. Returns true, unless
@@ -194,4 +194,3 @@ class Connection {
 };
 
 #endif  // _DB_COMMON_CONNECTION_H_
-

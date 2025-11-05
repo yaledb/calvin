@@ -13,18 +13,18 @@
 #include "common/configuration.h"
 #include "scheduler/lock_manager.h"
 #include "common/utils.h"
+#include "common/definitions.hh"
 
-using std::tr1::unordered_map;
 using std::deque;
+using std::tr1::unordered_map;
 
-#define TABLE_SIZE 1000000
+// #define LOCK_TABLE_SIZE 1000000
 
 class TxnProto;
 
 class DeterministicLockManager {
  public:
-  DeterministicLockManager(deque<TxnProto*>* ready_txns,
-                           Configuration* config);
+  DeterministicLockManager(deque<TxnProto*>* ready_txns, Configuration* config);
   virtual ~DeterministicLockManager() {}
   virtual int Lock(TxnProto* txn);
   virtual void Release(const Key& key, TxnProto* txn);
@@ -37,7 +37,7 @@ class DeterministicLockManager {
       hash = hash ^ (key[i]);
       hash = hash * 16777619;
     }
-    return hash % TABLE_SIZE;
+    return hash % LOCK_TABLE_SIZE;
   }
 
   bool IsLocal(const Key& key) {
@@ -60,15 +60,14 @@ class DeterministicLockManager {
     TxnProto* txn;  // Pointer to txn requesting the lock.
     LockMode mode;  // Specifies whether this is a read or write lock request.
   };
-  
+
   struct KeysList {
     KeysList(Key m, deque<LockRequest>* t) : key(m), locksrequest(t) {}
     Key key;
     deque<LockRequest>* locksrequest;
   };
 
-
-  deque<KeysList>* lock_table_[TABLE_SIZE];
+  deque<KeysList>* lock_table_[LOCK_TABLE_SIZE];
 
   // Queue of pointers to transactions that have acquired all locks that
   // they have requested. 'ready_txns_[key].front()' is the owner of the lock

@@ -70,7 +70,7 @@ Installation
 
   And there are some import parameters you need to edit :
    - src/deployment/main.cc, #define HOT ***: Set amount of Hot records for micorbenchmark, it is used to vary contention index (100 means contention index = 0.01);
-   - src/sequencer/sequencer.h: #define MAX_BATCH_SIZE *** : Set batch size per 10 ms epoch , set it a little bigger than the actually throughput(200 means every second the sequencer creates 20K transactions)     
+   - src/sequencer/sequencer.h: #define MAX_LOCK_BATCH_SIZE *** : Set batch size per 10 ms epoch , set it a little bigger than the actually throughput(200 means every second the sequencer creates 20K transactions)     
 
   You should make sure that your LD_LIBRARY_PATH includes the object files noted in the dependencies above. And you need to edit deploy-run.conf to include the machines which Calvin run on(The port should be same with the port in the src/deployment/portfile).
 

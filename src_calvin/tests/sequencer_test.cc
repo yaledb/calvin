@@ -13,4 +13,3 @@ TEST(SequencerTest) {
 int main(int argc, char** argv) {
   SequencerTest();
 }
-

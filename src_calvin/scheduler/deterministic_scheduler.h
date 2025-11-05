@@ -17,6 +17,7 @@
 
 #include "scheduler/scheduler.h"
 #include "common/utils.h"
+#include "common/definitions.hh"
 #include "proto/txn.pb.h"
 #include "proto/message.pb.h"
 
@@ -25,7 +26,7 @@ using std::deque;
 namespace zmq {
 class socket_t;
 class message_t;
-}
+}  // namespace zmq
 using zmq::socket_t;
 
 class Configuration;
@@ -34,19 +35,27 @@ class DeterministicLockManager;
 class Storage;
 class TxnProto;
 
-#define NUM_THREADS 4
-// #define PREFETCHING
-
 class DeterministicScheduler : public Scheduler {
  public:
-  DeterministicScheduler(Configuration* conf, Connection* batch_connection,
-                         Storage* storage, const Application* application);
+  enum Task {
+    ProcessDoneTransaction,
+    LoadNextBatch,
+    AdvanceBatch,
+    Locking,
+    ProcessReadyTransaction,
+    Size
+  };
+
+  DeterministicScheduler(Configuration* conf,
+                         Connection* batch_connection,
+                         Storage* storage,
+                         const Application* application);
   virtual ~DeterministicScheduler();
 
  private:
   // Function for starting main loops in a separate pthreads.
   static void* RunWorkerThread(void* arg);
-  
+
   static void* LockManagerThread(void* arg);
 
   void SendTxnPtr(socket_t* socket, TxnProto* txn);
@@ -56,8 +65,8 @@ class DeterministicScheduler : public Scheduler {
   Configuration* configuration_;
 
   // Thread contexts and their associated Connection objects.
-  pthread_t threads_[NUM_THREADS];
-  Connection* thread_connections_[NUM_THREADS];
+  pthread_t threads_[NUM_WORKERS];
+  Connection* thread_connections_[NUM_WORKERS];
 
   pthread_t lock_manager_thread_;
   // Connection for receiving txn batches from sequencer.
@@ -65,7 +74,7 @@ class DeterministicScheduler : public Scheduler {
 
   // Storage layer used in application execution.
   Storage* storage_;
-  
+
   // Application currently being run.
   const Application* application_;
 
@@ -79,15 +88,14 @@ class DeterministicScheduler : public Scheduler {
   std::deque<TxnProto*>* ready_txns_;
 
   // Sockets for communication between main scheduler thread and worker threads.
-//  socket_t* requests_out_;
-//  socket_t* requests_in_;
-//  socket_t* responses_out_[NUM_THREADS];
-//  socket_t* responses_in_;
-  
+  //  socket_t* requests_out_;
+  //  socket_t* requests_in_;
+  //  socket_t* responses_out_[NUM_WORKERS];
+  //  socket_t* responses_in_;
+
   AtomicQueue<TxnProto*>* txns_queue;
   AtomicQueue<TxnProto*>* done_queue;
-  
-  AtomicQueue<MessageProto>* message_queues[NUM_THREADS];
-  
+
+  AtomicQueue<MessageProto>* message_queues[NUM_WORKERS];
 };
 #endif  // _DB_SCHEDULER_DETERMINISTIC_SCHEDULER_H_

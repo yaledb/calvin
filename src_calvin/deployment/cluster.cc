@@ -30,8 +30,8 @@ int UpdatePorts(int port_begin, Configuration* config);
 void Deploy(const Configuration& config, const char* exec);
 
 const char default_input_config_filename[] = "deployment/test.conf";
-const char default_port_filename[]         = "deployment/portfile";
-const char default_executable_filename[]   = "../obj/deployment/db";
+const char default_port_filename[] = "deployment/portfile";
+const char default_executable_filename[] = "../obj/deployment/db";
 
 const char default_run_config_filename[] = "deploy-run.conf";
 const char remote_exec[] = "ssh";
@@ -47,7 +47,6 @@ const char remote_quite_opt3_fmt[] = "cd %s; %s %d %s > /dev/null 2>&1";
 const char remote_valgrind_opt3_fmt[] = "cd %s; valgrind %s %d %s";
 // sprintf(remote_opt3, remote_opt3_fmt,
 //         cwd, per-exec, node-id, db-args (joined with spaces))
-
 
 // TODO(scw): make deployer class; these should be class objs
 char* cwd;
@@ -66,20 +65,19 @@ int main(int argc, char* argv[]) {
   int arg_begin;
 
   const char* config_file = default_input_config_filename;
-  const char* port_file   = default_port_filename;
-  const char* exec        = default_executable_filename;
+  const char* port_file = default_port_filename;
+  const char* exec = default_executable_filename;
 
   for (arg_begin = 1; arg_begin < argc; ++arg_begin) {
     if (strcmp(argv[arg_begin], "-h") == 0) {
-      printf("Usage: %s [-v|-q] [-c config-file] [-p port-file]\n"
-             "          [-d db-exec] [db-args..]\n"
-             "  -c config-file   default: %s\n"
-             "  -p port-file     default: %s\n"
-             "  -d db-exec       default: %s\n",
-             argv[0],
-             default_input_config_filename,
-             default_port_filename,
-             default_executable_filename);
+      printf(
+          "Usage: %s [-v|-q] [-c config-file] [-p port-file]\n"
+          "          [-d db-exec] [db-args..]\n"
+          "  -c config-file   default: %s\n"
+          "  -p port-file     default: %s\n"
+          "  -d db-exec       default: %s\n",
+          argv[0], default_input_config_filename, default_port_filename,
+          default_executable_filename);
       return 0;
     } else if (strcmp(argv[arg_begin], "-c") == 0) {
       config_file = argv[++arg_begin];
@@ -133,14 +131,14 @@ int main(int argc, char* argv[]) {
   fprintf(port_fp, "%d\n", next_port);
   fclose(port_fp);
 
-//  for (map<int, Node*>::iterator it = config.all_nodes.begin();
-//       it != config.all_nodes.end(); ++it) {
-//    char copy_config[1024];
-//    snprintf(copy_config, sizeof(copy_config),
-//             "scp -rp deploy-run.conf %s:db3/deploy-run.conf",
-//             it->second->host.c_str());
-//    system(copy_config);
-//  }
+  //  for (map<int, Node*>::iterator it = config.all_nodes.begin();
+  //       it != config.all_nodes.end(); ++it) {
+  //    char copy_config[1024];
+  //    snprintf(copy_config, sizeof(copy_config),
+  //             "scp -rp deploy-run.conf %s:db3/deploy-run.conf",
+  //             it->second->host.c_str());
+  //    system(copy_config);
+  //  }
 
   Deploy(config, exec);
 
@@ -181,8 +179,7 @@ int UpdatePorts(int port_begin, Configuration* config) {
     // Insert <node->host, port_begin> if the host has not appeared.
     // Otherwise, use the existing host-port pair.
     map<string, int>::iterator port_it =
-      next_port_map.insert(std::make_pair(node->host, port_begin))
-                   .first;
+        next_port_map.insert(std::make_pair(node->host, port_begin)).first;
 
     node->port = port_it->second;
     port_it->second = port_it->second + 1;
@@ -212,14 +209,14 @@ void DeployOne(int nodeID,
 
   char remote_opt3[1024];
   if (do_valgrind)
-    snprintf(remote_opt3, sizeof(remote_opt3), remote_valgrind_opt3_fmt,
-             cwd, exec, nodeID, db_args);
+    snprintf(remote_opt3, sizeof(remote_opt3), remote_valgrind_opt3_fmt, cwd,
+             exec, nodeID, db_args);
   else if (do_quite)
-    snprintf(remote_opt3, sizeof(remote_opt3), remote_quite_opt3_fmt,
-             cwd, exec, nodeID, db_args);
+    snprintf(remote_opt3, sizeof(remote_opt3), remote_quite_opt3_fmt, cwd, exec,
+             nodeID, db_args);
   else
-    snprintf(remote_opt3, sizeof(remote_opt3), remote_opt3_fmt,
-             cwd, exec, nodeID, db_args);
+    snprintf(remote_opt3, sizeof(remote_opt3), remote_opt3_fmt, cwd, exec,
+             nodeID, db_args);
 
   // Black magic, don't touch (bug scw if this breaks).
   int pipefd[2];
@@ -242,10 +239,10 @@ void DeployOne(int nodeID,
     close(pipefd[1]);
   }
 
-  timespec to_sleep = { 0, 100000000 };  // 0.1 sec
+  timespec to_sleep = {0, 100000000};  // 0.1 sec
   nanosleep(&to_sleep, NULL);
 
-  (void) config_file;
+  (void)config_file;
 }
 
 void TerminatingChildren(int sig);
@@ -334,7 +331,7 @@ void Deploy(const Configuration& config, const char* exec) {
   // kill all active components & all ssh procs
   KillRemote(config, exec, false);
 
-  timespec to_sleep = { 1, 0 };  // 1 sec
+  timespec to_sleep = {1, 0};  // 1 sec
   nanosleep(&to_sleep, NULL);
   KillLocal();
 }
@@ -346,7 +343,8 @@ void TerminatingChildren(int sig) {
 
 // try to kill all remote processes spawned
 void KillRemote(const Configuration& config,
-                const char* exec, bool client_int) {
+                const char* exec,
+                bool client_int) {
   const char* sig_arg;
   if (client_int)
     sig_arg = "-INT";
@@ -354,17 +352,16 @@ void KillRemote(const Configuration& config,
     sig_arg = "-TERM";
 
   char exec_fullpath[1024];
-  snprintf(exec_fullpath, sizeof(exec_fullpath), "%s/%s",
-           cwd, exec);
+  snprintf(exec_fullpath, sizeof(exec_fullpath), "%s/%s", cwd, exec);
 
-  for (map<int, Node*>::const_iterator it = config.all_nodes.begin() ;
-    it != config.all_nodes.end(); ++it) {
+  for (map<int, Node*>::const_iterator it = config.all_nodes.begin();
+       it != config.all_nodes.end(); ++it) {
     Node* node = it->second;
 
     int pid = fork();
     if (pid == 0) {
-      execlp("ssh", "ssh", node->host.c_str(),
-             "killall", sig_arg, exec_fullpath, NULL);
+      execlp("ssh", "ssh", node->host.c_str(), "killall", sig_arg,
+             exec_fullpath, NULL);
       exit(-1);
     }
   }

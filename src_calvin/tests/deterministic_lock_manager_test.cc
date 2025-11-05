@@ -114,9 +114,9 @@ TEST(ThroughputTest) {
   args.SerializeToString(&args_string);
 
   for (int i = 0; i < 100000; i++) {
-//    txns.push_back(new TxnProto());
-//    for (int j = 0; j < 10; j++)
-//      txns[i]->add_read_write_set(IntToString(j * 1000 + rand() % 1000));
+    //    txns.push_back(new TxnProto());
+    //    for (int j = 0; j < 10; j++)
+    //      txns[i]->add_read_write_set(IntToString(j * 1000 + rand() % 1000));
     txns.push_back(tpcc.NewTxn(i, TPCC::NEW_ORDER, args_string, NULL));
   }
 
@@ -140,8 +140,7 @@ TEST(ThroughputTest) {
 }
 
 int main(int argc, char** argv) {
-//  SimpleLockingTest();
-//  LocksReleasedOutOfOrder();
+  //  SimpleLockingTest();
+  //  LocksReleasedOutOfOrder();
   ThroughputTest();
 }
-

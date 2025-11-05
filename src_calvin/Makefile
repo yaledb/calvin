@@ -47,7 +47,7 @@ CXXFLAGS := -g -MD $(PG) -I$(SRCDIR) -I$(OBJDIR) \
             -I$(PROTOB)/src \
             -I$(GTEST)/include \
             -I$(ZOOKPR)/include -I$(ZOOKPR)/generated
-CXXFLAGS += -Wall -Werror
+CXXFLAGS += -Wall -Werror -Wno-format-truncation -Wno-unused-result -Wno-maybe-uninitialized
 
 LDFLAGS := -lrt -lpthread $(PG) \
            -lprotobuf -L$(PROTOB)/src/.libs \

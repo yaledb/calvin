@@ -28,9 +28,7 @@
 #include <tr1/unordered_map>
 #include <pthread.h>
 
-
 #include "common/types.h"
-
 
 using std::map;
 using std::string;
@@ -93,4 +91,3 @@ class Configuration {
 };
 
 #endif  // _DB_COMMON_CONFIGURATION_H_
-

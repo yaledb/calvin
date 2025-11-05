@@ -30,4 +30,3 @@ int main(int argc, char** argv) {
   ConfigurationTest_ReadFromFile();
   ConfigurationTest_LookupPartition();
 }
-

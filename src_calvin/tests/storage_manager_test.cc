@@ -135,8 +135,7 @@ TEST(TwoNodes) {
 }
 
 int main(int argc, char** argv) {
-// TODO(alex): Fix these tests!
-//  SingleNode();
-//  TwoNodes();
+  // TODO(alex): Fix these tests!
+  //  SingleNode();
+  //  TwoNodes();
 }
-

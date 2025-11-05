@@ -17,11 +17,12 @@ using std::set;
 SimpleStorage* actual_storage;
 Configuration* config;
 
-#define CHECK_OBJECT(KEY, EXPECTED_VALUE) do {     \
-  Value* actual_value;                             \
-  actual_value = actual_storage->ReadObject(KEY); \
-  EXPECT_EQ(EXPECTED_VALUE, *actual_value);        \
-} while (0)
+#define CHECK_OBJECT(KEY, EXPECTED_VALUE)           \
+  do {                                              \
+    Value* actual_value;                            \
+    actual_value = actual_storage->ReadObject(KEY); \
+    EXPECT_EQ(EXPECTED_VALUE, *actual_value);       \
+  } while (0)
 
 TEST(MicrobenchmarkTest) {
   config = new Configuration(0, "common/configuration_test_one_node.conf");
@@ -38,22 +39,20 @@ TEST(MicrobenchmarkTest) {
   txn->add_readers(0);
   txn->add_writers(0);
 
-  StorageManager* storage = new StorageManager(config, connection,
-                                               actual_storage, txn);
+  StorageManager* storage =
+      new StorageManager(config, connection, actual_storage, txn);
   microbenchmark.Execute(txn, storage);
 
   // Check post-execution storage state.
   set<int> write_set;
-  for (int i = 0; i < Microbenchmark::kRWSetSize; i++)
+  for (int i = 0; i < Microbenchmark::RW_SET_SIZE; i++)
     write_set.insert(StringToInt(txn->write_set(i)));
-  for (int i = 0; i < microbenchmark.kDBSize; i++) {
+  for (int i = 0; i < microbenchmark.DB_SIZE; i++) {
     if (write_set.count(i))
-      CHECK_OBJECT(IntToString(i), IntToString(i+1));
+      CHECK_OBJECT(IntToString(i), IntToString(i + 1));
     else
       CHECK_OBJECT(IntToString(i), IntToString(i));
   }
-
-
 
   delete storage;
   delete txn;
@@ -69,4 +68,3 @@ TEST(MicrobenchmarkTest) {
 int main(int argc, char** argv) {
   MicrobenchmarkTest();
 }
-

@@ -37,10 +37,9 @@ class VersionedStorage : public Storage {
   // specified (i.e. txn_id).
   virtual int Checkpoint() = 0;
 
-
   // TODO(Thad): Implement something real here
-  virtual bool Prefetch(const Key &key, double* wait_time)  { return false; }
-  virtual bool Unfetch(const Key &key)                      { return false; }
+  virtual bool Prefetch(const Key& key, double* wait_time) { return false; }
+  virtual bool Unfetch(const Key& key) { return false; }
 };
 
 #endif  // _DB_BACKEND_VERSIONED_STORAGE_H_

@@ -18,11 +18,14 @@
 #include "proto/message.pb.h"
 #include "proto/txn.pb.h"
 
-SerialScheduler::SerialScheduler(Configuration* conf, Connection* connection,
-                                 Storage* storage, bool checkpointing)
-    : configuration_(conf), connection_(connection), storage_(storage),
-      checkpointing_(checkpointing) {
-}
+SerialScheduler::SerialScheduler(Configuration* conf,
+                                 Connection* connection,
+                                 Storage* storage,
+                                 bool checkpointing)
+    : configuration_(conf),
+      connection_(connection),
+      storage_(storage),
+      checkpointing_(checkpointing) {}
 
 SerialScheduler::~SerialScheduler() {}
 
@@ -31,7 +34,7 @@ void SerialScheduler::Run(const Application& application) {
   TxnProto txn;
   StorageManager* manager;
   Connection* manager_connection =
-  connection_->multiplexer()->NewConnection("manager_connection");
+      connection_->multiplexer()->NewConnection("manager_connection");
 
   int txns = 0;
   double time = GetTime();

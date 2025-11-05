@@ -18,7 +18,7 @@ int throughput;
 
 // Create Paxos object to submit some batches, inserting them into
 // a globally consistent batch order.
-void* Writer(void *arg) {
+void* Writer(void* arg) {
   // Create paxos object.
   Paxos writer(ZOOKEEPER_CONF, false);
 
@@ -36,7 +36,7 @@ void* Writer(void *arg) {
     write_number++;
     // The interal is 0 to 1 msec.
     srand(50);
-    usleep((rand()%10)*100);
+    usleep((rand() % 10) * 100);
     // Test for 70 seconds.
     if (end - start > 70)
       break;
@@ -46,7 +46,7 @@ void* Writer(void *arg) {
 }
 
 // Create Paxos object to read batches from zookeeper.
-void* Reader(void *arg) {
+void* Reader(void* arg) {
   // Create Paxos object.
   Paxos reader(ZOOKEEPER_CONF, true);
 

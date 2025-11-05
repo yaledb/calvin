@@ -19,11 +19,11 @@ class Storage {
 
   // Loads object specified by 'key' into memory if currently stored
   // on disk, asynchronously or otherwise.
-  virtual bool Prefetch(const Key &key, double* wait_time) = 0;
+  virtual bool Prefetch(const Key& key, double* wait_time) = 0;
 
   // Unfetch object on memory, writing it off to disk, asynchronously or
   // otherwise.
-  virtual bool Unfetch(const Key &key) = 0;
+  virtual bool Unfetch(const Key& key) = 0;
 
   // If the object specified by 'key' exists, copies the object into '*result'
   // and returns true. If the object does not exist, false is returned.
@@ -46,4 +46,3 @@ class Storage {
 };
 
 #endif  // _DB_BACKEND_STORAGE_H_
-

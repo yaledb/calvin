@@ -11,20 +11,19 @@
 #include <string>
 #include <queue>
 
-//#define PAXOS
-//#define PREFETCHING
-#define COLD_CUTOFF 990000
+#include "common/definitions.hh"
 
-#define MAX_BATCH_SIZE 200
+// #define PAXOS
+// #define PREFETCHING
 
 #define SAMPLES 100000
 #define SAMPLE_RATE 999
 
-//#define LATENCY_TEST
+// #define LATENCY_TEST
 
+using std::queue;
 using std::set;
 using std::string;
-using std::queue;
 
 class Configuration;
 class Connection;
@@ -53,7 +52,9 @@ class Sequencer {
  public:
   // The constructor creates background threads and starts the Sequencer's main
   // loops running.
-  Sequencer(Configuration* conf, Connection* connection, Client* client,
+  Sequencer(Configuration* conf,
+            Connection* connection,
+            Client* client,
             Storage* storage);
 
   // Halts the main loops.
@@ -77,8 +78,8 @@ class Sequencer {
 
   // Functions to start the Multiplexor's main loops, called in new pthreads by
   // the Sequencer's constructor.
-  static void* RunSequencerWriter(void *arg);
-  static void* RunSequencerReader(void *arg);
+  static void* RunSequencerWriter(void* arg);
+  static void* RunSequencerReader(void* arg);
 
   // Sets '*nodes' to contain the node_id of every node participating in 'txn'.
   void FindParticipatingNodes(const TxnProto& txn, set<int>* nodes);

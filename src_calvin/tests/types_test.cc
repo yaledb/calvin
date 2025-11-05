@@ -5,7 +5,7 @@
 #include "common/testing.h"
 
 TEST(PackSignedIntTest) {
-  int8  i1 = 65;
+  int8 i1 = 65;
   int16 i2 = -2551;
   int32 i3 = 0;
   int64 i4 = -2551255125512551;
@@ -19,7 +19,7 @@ TEST(PackSignedIntTest) {
 }
 
 TEST(PackUnsignedIntTest) {
-  uint8  u1 = 251;
+  uint8 u1 = 251;
   uint16 u2 = 2551;
   uint32 u3 = 0;
   uint64 u4 = 2551255125512551;

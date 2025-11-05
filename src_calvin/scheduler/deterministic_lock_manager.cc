@@ -12,12 +12,10 @@
 
 using std::vector;
 
-DeterministicLockManager::DeterministicLockManager(
-    deque<TxnProto*>* ready_txns,
-    Configuration* config)
-  : configuration_(config),
-    ready_txns_(ready_txns) {
-  for (int i = 0; i < TABLE_SIZE; i++)
+DeterministicLockManager::DeterministicLockManager(deque<TxnProto*>* ready_txns,
+                                                   Configuration* config)
+    : configuration_(config), ready_txns_(ready_txns) {
+  for (int i = 0; i < LOCK_TABLE_SIZE; i++)
     lock_table_[i] = new deque<KeysList>();
 }
 
@@ -29,10 +27,11 @@ int DeterministicLockManager::Lock(TxnProto* txn) {
     // Only lock local keys.
     if (IsLocal(txn->read_write_set(i))) {
       deque<KeysList>* key_requests = lock_table_[Hash(txn->read_write_set(i))];
-      
+
       deque<KeysList>::iterator it;
-      for(it = key_requests->begin();
-          it != key_requests->end() && it->key != txn->read_write_set(i); ++it) { 
+      for (it = key_requests->begin();
+           it != key_requests->end() && it->key != txn->read_write_set(i);
+           ++it) {
       }
       deque<LockRequest>* requests;
       if (it == key_requests->end()) {
@@ -41,7 +40,7 @@ int DeterministicLockManager::Lock(TxnProto* txn) {
       } else {
         requests = it->locksrequest;
       }
-      
+
       // Only need to request this if lock txn hasn't already requested it.
       if (requests->empty() || txn != requests->back().txn) {
         requests->push_back(LockRequest(WRITE, txn));
@@ -58,10 +57,10 @@ int DeterministicLockManager::Lock(TxnProto* txn) {
     // Only lock local keys.
     if (IsLocal(txn->read_set(i))) {
       deque<KeysList>* key_requests = lock_table_[Hash(txn->read_set(i))];
-      
+
       deque<KeysList>::iterator it;
-      for(it = key_requests->begin();
-          it != key_requests->end() && it->key != txn->read_set(i); ++it) { 
+      for (it = key_requests->begin();
+           it != key_requests->end() && it->key != txn->read_set(i); ++it) {
       }
       deque<LockRequest>* requests;
       if (it == key_requests->end()) {
@@ -70,7 +69,7 @@ int DeterministicLockManager::Lock(TxnProto* txn) {
       } else {
         requests = it->locksrequest;
       }
-      
+
       // Only need to request this if lock txn hasn't already requested it.
       if (requests->empty() || txn != requests->back().txn) {
         requests->push_back(LockRequest(READ, txn));
@@ -100,9 +99,9 @@ void DeterministicLockManager::Release(TxnProto* txn) {
       Release(txn->read_set(i), txn);
   // Currently commented out because nothing in any write set can conflict
   // in TPCC or Microbenchmark.
-//  for (int i = 0; i < txn->write_set_size(); i++)
-//    if (IsLocal(txn->write_set(i)))
-//      Release(txn->write_set(i), txn);
+  //  for (int i = 0; i < txn->write_set_size(); i++)
+  //    if (IsLocal(txn->write_set(i)))
+  //      Release(txn->write_set(i), txn);
   for (int i = 0; i < txn->read_write_set_size(); i++)
     if (IsLocal(txn->read_write_set(i)))
       Release(txn->read_write_set(i), txn);
@@ -110,21 +109,19 @@ void DeterministicLockManager::Release(TxnProto* txn) {
 
 void DeterministicLockManager::Release(const Key& key, TxnProto* txn) {
   // Avoid repeatedly looking up key in the unordered_map.
-      deque<KeysList>* key_requests = lock_table_[Hash(key)];
-      
+  deque<KeysList>* key_requests = lock_table_[Hash(key)];
+
   deque<KeysList>::iterator it1;
-  for(it1 = key_requests->begin();
-    it1 != key_requests->end() && it1->key != key; ++it1) { 
+  for (it1 = key_requests->begin();
+       it1 != key_requests->end() && it1->key != key; ++it1) {
   }
   deque<LockRequest>* requests = it1->locksrequest;
-
 
   // Seek to the target request. Note whether any write lock requests precede
   // the target.
   bool write_requests_precede_target = false;
   deque<LockRequest>::iterator it;
-  for (it = requests->begin();
-       it != requests->end() && it->txn != txn; ++it) {
+  for (it = requests->begin(); it != requests->end() && it->txn != txn; ++it) {
     if (it->mode == WRITE)
       write_requests_precede_target = true;
   }
@@ -154,8 +151,8 @@ void DeterministicLockManager::Release(const Key& key, TxnProto* txn) {
         // If a sequence of read lock requests follows, grant all of them.
         for (; it != requests->end() && it->mode == READ; ++it)
           new_owners.push_back(it->txn);
-      } else if (!write_requests_precede_target &&
-                 target->mode == WRITE && it->mode == READ) {  // (c)
+      } else if (!write_requests_precede_target && target->mode == WRITE &&
+                 it->mode == READ) {  // (c)
         // If a sequence of read lock requests follows, grant all of them.
         for (; it != requests->end() && it->mode == READ; ++it)
           new_owners.push_back(it->txn);
@@ -177,9 +174,7 @@ void DeterministicLockManager::Release(const Key& key, TxnProto* txn) {
     requests->erase(target);
     if (requests->size() == 0) {
       delete requests;
-      key_requests->erase(it1);    
+      key_requests->erase(it1);
     }
-
   }
 }
-

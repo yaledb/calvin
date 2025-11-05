@@ -76,5 +76,3 @@ int main(int argc, char** argv) {
   CollapsedVersionedStorageTest();
   CheckpointingTest();
 }
-
-

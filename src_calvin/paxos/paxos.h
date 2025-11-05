@@ -53,7 +53,7 @@ class Paxos {
 
  private:
   // The zookeeper handle obtained by a call to zookeeper_init.
-  zhandle_t *zh_;
+  zhandle_t* zh_;
 
   // Record the serial number of the batch which will be read next time.
   uint64 next_read_batch_index_;
@@ -68,11 +68,14 @@ class Paxos {
   // For zoo_aget completion function, this method will be invoked
   // at the end of a asynchronous call( zoo_aget is asynchronous call
   // which get data from zookeeper).
-  static void get_data_completion(int rc, const char *value, int value_len,
-                                  const struct Stat *stat, const void *data);
+  static void get_data_completion(int rc,
+                                  const char* value,
+                                  int value_len,
+                                  const struct Stat* stat,
+                                  const void* data);
 
   // For zoo_acreate completion function, this method will be invoked
   // at the end of zoo_acreate function.
-  static void acreate_completion(int rc, const char *name, const void * data);
+  static void acreate_completion(int rc, const char* name, const void* data);
 };
 #endif  // _DB_PAXOS_PAXOS_H_

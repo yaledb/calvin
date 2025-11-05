@@ -11,4 +11,3 @@ TEST(MyTest) {
 int main(int argc, char** argv) {
   MyTest();
 }
-

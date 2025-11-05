@@ -4,7 +4,7 @@ OBJDIRS += applications
 UPPERC_DIR := APPLICATIONS
 LOWERC_DIR := applications
 
-APPLICATIONS_SRCS := applications/tpcc.cc applications/microbenchmark.cc
+APPLICATIONS_SRCS := applications/tpcc.cc applications/microbenchmark.cc applications/ycsb.cc
 
 SRC_LINKED_OBJECTS := $(PROTO_OBJS)
 TEST_LINKED_OBJECTS := $(PROTO_OBJS) $(COMMON_OBJS) $(BACKEND_OBJS)

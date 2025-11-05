@@ -11,26 +11,35 @@
 #include <string>
 
 #include "applications/application.h"
+#include "common/definitions.hh"
+#include "common/random.hh"
+#include "common/zipf.hh"
 
 using std::set;
 using std::string;
 
 class Microbenchmark : public Application {
  public:
+  Xoroshiro128Plus rnd_;
+  FastZipf zipf_;
+
   enum TxnType {
     INITIALIZE = 0,
     MICROTXN_SP = 1,
     MICROTXN_MP = 2,
   };
 
-  Microbenchmark(int nodecount, int hotcount) {
+  Microbenchmark(int nodecount, int hotcount)
+      : rnd_(), zipf_(&rnd_, SKEW, DB_SIZE) {
     nparts = nodecount;
     hot_records = hotcount;
   }
 
   virtual ~Microbenchmark() {}
 
-  virtual TxnProto* NewTxn(int64 txn_id, int txn_type, string args,
+  virtual TxnProto* NewTxn(int64 txn_id,
+                           int txn_type,
+                           string args,
                            Configuration* config = NULL) const;
   virtual int Execute(TxnProto* txn, StorageManager* storage) const;
 
@@ -40,16 +49,17 @@ class Microbenchmark : public Application {
 
   int nparts;
   int hot_records;
-  static const int kRWSetSize = 10;  // MUST BE EVEN
-  static const int kDBSize = 1000000;
-
 
   virtual void InitializeStorage(Storage* storage, Configuration* conf) const;
 
  private:
-  void GetRandomKeys(set<int>* keys, int num_keys, int key_start,
-                     int key_limit, int part);
-  Microbenchmark() {}
+  void GetRandomKeys(set<int>* keys,
+                     int num_keys,
+                     int key_start,
+                     int key_limit,
+                     int part,
+                     bool is_uniform);
+  Microbenchmark() : rnd_(), zipf_(&rnd_, SKEW, DB_SIZE) {}
 };
 
 #endif  // _DB_APPLICATIONS_MICROBENCHMARK_H_

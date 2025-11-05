@@ -14,6 +14,5 @@ class Application;
 class Scheduler {
  public:
   virtual ~Scheduler() {}
-
 };
 #endif  // _DB_SCHEDULER_SCHEDULER_H_

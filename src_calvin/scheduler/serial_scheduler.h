@@ -14,8 +14,10 @@ class Storage;
 
 class SerialScheduler : public Scheduler {
  public:
-  SerialScheduler(Configuration* conf, Connection* connection,
-                  Storage* storage, bool checkpointing);
+  SerialScheduler(Configuration* conf,
+                  Connection* connection,
+                  Storage* storage,
+                  bool checkpointing);
   virtual ~SerialScheduler();
   virtual void Run(const Application& application);
 
